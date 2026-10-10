@@ -23,12 +23,32 @@ export default function Hero({ onOpenAuth }) {
           una relación significativa basada en los mismos principios, valores y visión de futuro.
         </p>
 
+        {/* BOTONES PRINCIPALES: CREAR CUENTA E INICIAR SESIÓN */}
         <div className="hero-buttons">
-          <button className="primary-btn tinder-cta-btn" onClick={() => onOpenAuth('register')}>
+          <button
+            type="button"
+            className="primary-btn tinder-cta-btn"
+            onClick={() => onOpenAuth('register')}
+          >
             Crear mi cuenta gratis
           </button>
-          <button className="secondary-btn tinder-secondary-btn" onClick={scrollToFeatures}>
-            Ver cómo funciona
+          <button
+            type="button"
+            className="secondary-btn hero-login-btn"
+            onClick={() => onOpenAuth('login')}
+          >
+            👤 Iniciar sesión
+          </button>
+        </div>
+
+        <div className="hero-member-prompt">
+          <span>¿Ya tienes cuenta creada? </span>
+          <button
+            type="button"
+            className="text-link-btn"
+            onClick={() => onOpenAuth('login')}
+          >
+            Entra aquí directamente →
           </button>
         </div>
 
