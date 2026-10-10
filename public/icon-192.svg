@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="pwaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#087f5b" />
+      <stop offset="50%" stop-color="#12b886" />
+      <stop offset="100%" stop-color="#20c997" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Fondo redondeado estilo App Icon -->
+  <rect width="192" height="192" rx="42" fill="url(#pwaGrad)" />
+
+  <!-- Corazón & Llama central en blanco brillante -->
+  <g filter="url(#shadow)" transform="translate(41, 38)">
+    <path fill="#ffffff" d="M55 96.5l-6.6-6C24.8 69.4 9 55.1 9 37.6 9 23.3 20.3 12 34.5 12c8.1 0 15.8 3.8 20.5 9.7C59.7 15.8 67.4 12 75.5 12 89.7 12 101 23.3 101 37.6c0 17.5-15.8 31.8-39.4 52.9L55 96.5z"/>
+    <!-- Pequeña llama / cruz con propósito en el centro -->
+    <path fill="#087f5b" d="M55 35c3 7 12 12 12 19 0 6.6-5.4 12-12 12s-12-5.4-12-12c0-7 9-12 12-19z"/>
+  </g>
+</svg>

@@ -2042,3 +2042,123 @@ footer {
     gap: 14px;
   }
 }
+
+
+/* ==========================================================
+   PWA INSTALL BANNER (FLOTANTE EN MÓVIL)
+   ========================================================== */
+
+.pwa-install-banner {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  max-width: 500px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--border-light);
+  z-index: 2000;
+  animation: slideUpBanner 0.35s ease;
+}
+
+@keyframes slideUpBanner {
+  from { transform: translateY(100px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.pwa-install-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pwa-app-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--primary-gradient);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(8, 127, 91, 0.25);
+}
+
+.pwa-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pwa-text strong {
+  font-size: 14px;
+  color: var(--text-main);
+}
+
+.pwa-text span {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.pwa-install-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.pwa-install-btn {
+  padding: 10px 18px;
+  font-size: 13px;
+  border-radius: var(--radius-pill);
+}
+
+.pwa-ios-instructions {
+  font-size: 11px;
+  color: var(--primary);
+  max-width: 140px;
+  text-align: right;
+  line-height: 1.3;
+}
+
+.pwa-dismiss-btn {
+  background: #f1f5f3;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--text-muted);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pwa-dismiss-btn:hover {
+  background: #e2ede8;
+}
+
+@media (max-width: 500px) {
+  .pwa-install-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+  }
+  .pwa-install-actions {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+}

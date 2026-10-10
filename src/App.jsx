@@ -8,6 +8,7 @@ import Cta from "./components/Cta";
 import Footer from "./components/Footer";
 import AuthModal from "./components/AuthModal";
 import Dashboard from "./components/Dashboard";
+import PwaInstallPrompt from "./components/PwaInstallPrompt";
 
 function MainContent() {
   const { user, loading } = useAuth();
@@ -27,26 +28,29 @@ function MainContent() {
     );
   }
 
-  // Si el usuario tiene sesión activa, mostramos la comunidad / Dashboard
-  if (user) {
-    return <Dashboard />;
-  }
-
-  // Si no está autenticado, mostramos la Landing Page interactiva
   return (
-    <div className="app">
-      <Navbar onOpenAuth={openAuth} />
-      <Hero onOpenAuth={openAuth} />
-      <Features />
-      <Cta onOpenAuth={openAuth} />
-      <Footer />
+    <>
+      {user ? (
+        <Dashboard />
+      ) : (
+        <div className="app">
+          <Navbar onOpenAuth={openAuth} />
+          <Hero onOpenAuth={openAuth} />
+          <Features />
+          <Cta onOpenAuth={openAuth} />
+          <Footer />
 
-      <AuthModal
-        isOpen={isModalOpen}
-        initialTab={modalTab}
-        onClose={() => setIsModalOpen(false)}
-      />
-    </div>
+          <AuthModal
+            isOpen={isModalOpen}
+            initialTab={modalTab}
+            onClose={() => setIsModalOpen(false)}
+          />
+        </div>
+      )}
+
+      {/* AVISO DE INSTALACIÓN EN EL TELÉFONO (PWA) */}
+      <PwaInstallPrompt />
+    </>
   );
 }
 
