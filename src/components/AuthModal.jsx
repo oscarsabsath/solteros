@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import PhotoUploader from './PhotoUploader';
+import AiProfileAssistant from './AiProfileAssistant';
 
 const ADVENTIST_INTERESTS_LIST = [
   'Club de Conquistadores',
@@ -20,6 +21,7 @@ const ADVENTIST_INTERESTS_LIST = [
 export default function AuthModal({ isOpen, onClose, initialTab = 'register' }) {
   const [tab, setTab] = useState(initialTab);
   const [step, setStep] = useState(1); // 1: Fotos, 2: Datos & Fe, 3: Intereses & Cuenta
+  const [useAiAssistant, setUseAiAssistant] = useState(false);
   const { login, register, loginWithGoogle } = useAuth();
 
   const [loading, setLoading] = useState(false);
@@ -40,7 +42,6 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'register' }) 
     country: 'España',
     city: 'Madrid',
     churchName: '',
-    ministryRole: 'Conquistadores',
     bio: '',
     interests: ['Música Sacra / Canto', 'Vida Saludable & Nutrición'],
   });
@@ -148,6 +149,21 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'register' }) 
     }
   };
 
+  const handleAiProfileGenerated = (generated) => {
+    setRegisterData((prev) => ({
+      ...prev,
+      fullName: generated.fullName,
+      age: String(generated.age),
+      city: generated.city,
+      country: generated.country,
+      churchName: generated.churchName,
+      bio: generated.bio,
+      interests: generated.interests,
+    }));
+    setUseAiAssistant(false);
+    setStep(1); // Directo a subir fotos
+  };
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-card modal-card-large" onClick={(e) => e.stopPropagation()}>
@@ -161,6 +177,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'register' }) 
             className={`modal-tab ${tab === 'register' ? 'active' : ''}`}
             onClick={() => {
               setTab('register');
+              setUseAiAssistant(false);
               setError('');
             }}
           >
@@ -170,6 +187,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'register' }) 
             className={`modal-tab ${tab === 'login' ? 'active' : ''}`}
             onClick={() => {
               setTab('login');
+              setUseAiAssistant(false);
               setError('');
             }}
           >
@@ -241,9 +259,32 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'register' }) 
               </button>
             </form>
           </div>
+        ) : useAiAssistant ? (
+          /* VISTA ASISTENTE CONVERSACIONAL DE IA */
+          <AiProfileAssistant
+            onProfileGenerated={handleAiProfileGenerated}
+            onCancel={() => setUseAiAssistant(false)}
+          />
         ) : (
-          /* VISTA 2: CREACIÓN DE PERFIL MULTI-PASO (ESTILO BADOO) */
+          /* VISTA 2: CREACIÓN DE PERFIL MULTI-PASO CON ACCESO A IA */
           <div className="onboarding-wizard">
+            {/* BANNER PARA ACTIVAR ASISTENTE DE IA */}
+            <div
+              className="ai-launcher-banner"
+              onClick={() => setUseAiAssistant(true)}
+              role="button"
+              tabIndex={0}
+            >
+              <div className="ai-launcher-icon">✨</div>
+              <div className="ai-launcher-text">
+                <strong>¿Prefieres crear tu perfil conversando?</strong>
+                <span>El Asistente IA te hace 4 preguntas y redacta tu biografía en 1 min.</span>
+              </div>
+              <button type="button" className="ai-launcher-btn">
+                Probar IA ➔
+              </button>
+            </div>
+
             {/* BARRA DE PROGRESO */}
             <div className="wizard-progress-header">
               <div className="wizard-step-info">
@@ -389,7 +430,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'register' }) 
               </div>
             )}
 
-            {/* PASO 3: INTERESES CHIPS (ESTILO BADOO) Y CUENTA */}
+            {/* PASO 3: INTERESES CHIPS Y CUENTA */}
             {step === 3 && (
               <form onSubmit={handleFinalRegister} className="wizard-step-content">
                 <div className="form-group">
