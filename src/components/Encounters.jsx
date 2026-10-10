@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Encounters({ profiles = [], onLike, onDislike, onSuperLike }) {
+  const [history, setHistory] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [animationClass, setAnimationClass] = useState('');
+  const [showFullInfo, setShowFullInfo] = useState(false);
 
   const currentProfile = profiles[currentIndex] || null;
 
@@ -13,6 +15,12 @@ export default function Encounters({ profiles = [], onLike, onDislike, onSuperLi
         ? currentProfile.photos
         : [currentProfile.avatar_url].filter(Boolean))
     : [];
+
+  // Reset de la foto al cambiar de perfil
+  useEffect(() => {
+    setCurrentPhotoIndex(0);
+    setShowFullInfo(false);
+  }, [currentIndex]);
 
   const handleNextPhoto = (e) => {
     e.stopPropagation();
@@ -36,46 +44,60 @@ export default function Encounters({ profiles = [], onLike, onDislike, onSuperLi
     if (!currentProfile) return;
 
     if (type === 'dislike') {
-      setAnimationClass('swipe-left');
+      setAnimationClass('tinder-swipe-nope');
       setTimeout(() => {
+        setHistory((prev) => [...prev, { profile: currentProfile, action: 'dislike' }]);
         onDislike(currentProfile);
         nextProfile();
-      }, 250);
+      }, 260);
     } else if (type === 'like') {
-      setAnimationClass('swipe-right');
+      setAnimationClass('tinder-swipe-like');
       setTimeout(() => {
+        setHistory((prev) => [...prev, { profile: currentProfile, action: 'like' }]);
         onLike(currentProfile);
         nextProfile();
-      }, 250);
+      }, 260);
     } else if (type === 'superlike') {
-      setAnimationClass('swipe-up');
+      setAnimationClass('tinder-swipe-super');
       setTimeout(() => {
+        setHistory((prev) => [...prev, { profile: currentProfile, action: 'superlike' }]);
         onSuperLike(currentProfile);
         nextProfile();
-      }, 250);
+      }, 260);
     }
+  };
+
+  const handleRewind = () => {
+    if (history.length === 0 || currentIndex === 0) return;
+    setHistory((prev) => prev.slice(0, -1));
+    setCurrentIndex((prev) => Math.max(0, prev - 1));
+    setAnimationClass('');
   };
 
   const nextProfile = () => {
     setAnimationClass('');
-    setCurrentPhotoIndex(0);
     setCurrentIndex((prev) => prev + 1);
   };
 
   if (!currentProfile || currentIndex >= profiles.length) {
     return (
-      <div className="encounters-empty-card">
-        <div className="encounters-empty-icon">✨</div>
-        <h3>¡Has visto a todos por ahora!</h3>
-        <p>Has explorado todos los perfiles adventistas disponibles según tus preferencias.</p>
+      <div className="tinder-empty-deck">
+        <div className="radar-animation">
+          <div className="radar-circle circle-1"></div>
+          <div className="radar-circle circle-2"></div>
+          <div className="radar-circle circle-3"></div>
+          <div className="radar-avatar">✨</div>
+        </div>
+        <h3>No hay más personas cerca por ahora</h3>
+        <p>Has explorado todos los solteros adventistas disponibles. ¡Vuelve más tarde o ajusta tus filtros!</p>
         <button
-          className="primary-btn"
+          className="tinder-reload-btn"
           onClick={() => {
             setCurrentIndex(0);
-            setCurrentPhotoIndex(0);
+            setHistory([]);
           }}
         >
-          Volver a explorar desde el inicio
+          🔄 Volver a ver perfiles
         </button>
       </div>
     );
@@ -84,116 +106,151 @@ export default function Encounters({ profiles = [], onLike, onDislike, onSuperLi
   const currentPhoto = profilePhotos[currentPhotoIndex] || null;
 
   return (
-    <div className="encounters-wrapper">
-      <div className={`encounters-card ${animationClass}`}>
-        {/* FOTO PRINCIPAL Y NAVEGACIÓN ESTILO STORIES */}
-        <div className="encounters-photo-container">
+    <div className="tinder-deck-container">
+      {/* TARJETA DE PERFIL ESTILO TINDER */}
+      <div className={`tinder-card ${animationClass}`}>
+        {/* SELLOS DE ESTADO (LIKE / NOPE / SUPER LIKE) */}
+        <div className="tinder-stamp stamp-like">LIKE</div>
+        <div className="tinder-stamp stamp-nope">NOPE</div>
+        <div className="tinder-stamp stamp-super">SUPER LIKE</div>
+
+        {/* CONTENEDOR FOTOGRÁFICO */}
+        <div className="tinder-photo-viewport">
           {currentPhoto ? (
             <img
               src={currentPhoto}
               alt={currentProfile.full_name}
-              className="encounters-main-photo"
+              className="tinder-card-img"
             />
           ) : (
-            <div className="encounters-avatar-placeholder">
-              👤
-            </div>
+            <div className="tinder-avatar-fallback">👤</div>
           )}
 
-          {/* BARRITAS DE FOTOS ESTILO BADOO/STORIES */}
+          {/* BARRITAS DE NAVEGACIÓN ESTILO INSTA/TINDER STORIES */}
           {profilePhotos.length > 1 && (
-            <div className="photo-stories-bars">
+            <div className="tinder-story-bars">
               {profilePhotos.map((_, idx) => (
                 <div
                   key={idx}
-                  className={`story-bar ${idx === currentPhotoIndex ? 'active' : ''}`}
+                  className={`tinder-bar ${idx === currentPhotoIndex ? 'active' : ''}`}
                 ></div>
               ))}
             </div>
           )}
 
-          {/* CONTROLES TÁCTILES IZQUIERDA / DERECHA */}
+          {/* ZONAS TÁCTILES IZQ / DCHA */}
           {profilePhotos.length > 1 && (
             <>
-              <button
-                type="button"
-                className="photo-tap-left"
+              <div
+                className="tinder-tap-zone zone-left"
                 onClick={handlePrevPhoto}
-                aria-label="Foto anterior"
+                title="Foto anterior"
               />
-              <button
-                type="button"
-                className="photo-tap-right"
+              <div
+                className="tinder-tap-zone zone-right"
                 onClick={handleNextPhoto}
-                aria-label="Foto siguiente"
+                title="Foto siguiente"
               />
             </>
           )}
 
-          {/* DEGRADADO CON NOMBRE Y UBICACIÓN */}
-          <div className="encounters-overlay-info">
-            <div className="encounters-name-row">
-              <h2>{currentProfile.full_name}, {currentProfile.age}</h2>
-              <span className="encounters-verified-badge" title="Perfil verificado">✓ Verificado</span>
+          {/* OVERLAY DEGRADADO CON NOMBRE Y DETALLES */}
+          <div className="tinder-gradient-overlay">
+            <div className="tinder-headline">
+              <div className="tinder-name-age">
+                <h1>{currentProfile.full_name}</h1>
+                <span className="tinder-age">{currentProfile.age}</span>
+                <span className="tinder-badge-verified" title="Perfil adventista verificado">✓</span>
+              </div>
+
+              <button
+                type="button"
+                className="tinder-info-btn"
+                onClick={() => setShowFullInfo(!showFullInfo)}
+                title="Ver biografía completa"
+              >
+                {showFullInfo ? '✕' : 'ℹ'}
+              </button>
             </div>
 
-            <div className="encounters-meta">
-              <span>📍 {currentProfile.city}, {currentProfile.country}</span>
+            <div className="tinder-pills-row">
+              <span className="tinder-pill location-pill">
+                📍 {currentProfile.city}, {currentProfile.country}
+              </span>
               {currentProfile.church_name && (
-                <span className="church-tag">⛪ {currentProfile.church_name}</span>
+                <span className="tinder-pill church-pill">
+                  ⛪ {currentProfile.church_name}
+                </span>
               )}
             </div>
 
-            {currentProfile.bio && (
-              <p className="encounters-bio">{currentProfile.bio}</p>
-            )}
+            {/* VISTA RESUMIDA O EXPANDIDA DE LA BIOGRAFÍA */}
+            <p className={`tinder-bio ${showFullInfo ? 'expanded' : ''}`}>
+              {currentProfile.bio || 'Miembro activo adventista con metas de vida claras y fe compartida.'}
+            </p>
 
+            {/* CHIPS DE INTERESES / ESTILO DE VIDA */}
             {currentProfile.interests && currentProfile.interests.length > 0 && (
-              <div className="encounters-interests">
+              <div className="tinder-interests-cloud">
                 {currentProfile.interests.map((tag, i) => (
-                  <span key={i} className="interest-pill">#{tag}</span>
+                  <span key={i} className="tinder-interest-tag">#{tag}</span>
                 ))}
               </div>
             )}
           </div>
         </div>
-
-        {/* BOTONES DE ACCIÓN FLOTANTES DE BADOO (✕, ⭐, ❤️) */}
-        <div className="badoo-actions-bar">
-          <button
-            type="button"
-            className="badoo-action-btn btn-dislike"
-            onClick={() => triggerAction('dislike')}
-            title="Pasar / No me interesa"
-            aria-label="Dislike"
-          >
-            ✕
-          </button>
-
-          <button
-            type="button"
-            className="badoo-action-btn btn-superlike"
-            onClick={() => triggerAction('superlike')}
-            title="Super Conexión con propósito"
-            aria-label="Super Like"
-          >
-            ★
-          </button>
-
-          <button
-            type="button"
-            className="badoo-action-btn btn-like"
-            onClick={() => triggerAction('like')}
-            title="Me gusta / Conectar"
-            aria-label="Like"
-          >
-            ♥
-          </button>
-        </div>
       </div>
 
-      <div className="encounters-keyboard-tip">
-        <span>💡 Puedes hacer clic en los lados de la foto para ver más fotos de {currentProfile.full_name.split(' ')[0]}</span>
+      {/* BARRA DE ACCIONES TINDER (REWIND, NOPE, SUPER LIKE, LIKE, BOOST) */}
+      <div className="tinder-controls-bar">
+        <button
+          type="button"
+          className="tinder-ctrl-btn btn-rewind"
+          onClick={handleRewind}
+          disabled={history.length === 0}
+          title="Deshacer última acción"
+        >
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+            <path d="M12.5 8c-2.65 0-5.05 1-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/>
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          className="tinder-ctrl-btn btn-nope"
+          onClick={() => triggerAction('dislike')}
+          title="No me interesa (Pasar)"
+        >
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          className="tinder-ctrl-btn btn-super"
+          onClick={() => triggerAction('superlike')}
+          title="Super Conexión con propósito"
+        >
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          className="tinder-ctrl-btn btn-like"
+          onClick={() => triggerAction('like')}
+          title="Me gusta (Conectar con propósito)"
+        >
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+        </button>
+      </div>
+
+      <div className="tinder-keyboard-hint">
+        <span>Usa los botones o haz clic a los lados para cambiar de foto</span>
       </div>
     </div>
   );
