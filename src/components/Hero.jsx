@@ -1,6 +1,11 @@
 import heroImage from "../assets/hero-solteros.jpg";
 
-export default function Hero() {
+export default function Hero({ onOpenAuth }) {
+  const scrollToFeatures = () => {
+    const el = document.getElementById('como-funciona');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <main id="inicio" className="hero">
       <div className="hero-content">
@@ -17,8 +22,12 @@ export default function Hero() {
         </p>
 
         <div className="hero-buttons">
-          <button className="primary-btn">Crear mi cuenta</button>
-          <button className="secondary-btn">Conocer más</button>
+          <button className="primary-btn" onClick={() => onOpenAuth('register')}>
+            Crear mi cuenta
+          </button>
+          <button className="secondary-btn" onClick={scrollToFeatures}>
+            Conocer más
+          </button>
         </div>
 
         <div className="trust">
