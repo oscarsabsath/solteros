@@ -1533,3 +1533,545 @@ footer {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+
+/* ==========================================================
+   MODO ENCUENTROS (ESTILO BADOO SWIPE / LIKES)
+   ========================================================== */
+
+.encounters-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.encounters-section-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.encounters-section-header h2 {
+  font-size: 26px;
+  color: #17352d;
+  margin-bottom: 6px;
+}
+
+.encounters-section-header p {
+  color: #5c716a;
+  font-size: 15px;
+}
+
+.encounters-wrapper {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.encounters-card {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 30px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+  border: 1px solid #e1ece7;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  position: relative;
+}
+
+.encounters-card.swipe-left {
+  transform: translateX(-120px) rotate(-12deg);
+  opacity: 0;
+}
+
+.encounters-card.swipe-right {
+  transform: translateX(120px) rotate(12deg);
+  opacity: 0;
+}
+
+.encounters-card.swipe-up {
+  transform: translateY(-120px) scale(0.9);
+  opacity: 0;
+}
+
+.encounters-photo-container {
+  position: relative;
+  width: 100%;
+  height: 540px;
+  background: #17352d;
+  overflow: hidden;
+}
+
+.encounters-main-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  user-select: none;
+}
+
+.encounters-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+  color: #ffffff;
+  background: #087f5b;
+}
+
+/* BARRITAS DE HISTORIAS / FOTOS */
+
+.photo-stories-bars {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+
+.story-bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.4);
+  transition: background 0.2s;
+}
+
+.story-bar.active {
+  background: #ffffff;
+}
+
+.photo-tap-left,
+.photo-tap-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 5;
+  outline: none;
+}
+
+.photo-tap-left {
+  left: 0;
+}
+
+.photo-tap-right {
+  right: 0;
+}
+
+/* OVERLAY CON INFORMACIÓN DEL PERFIL */
+
+.encounters-overlay-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 50px 22px 20px;
+  background: linear-gradient(to top, rgba(10, 28, 22, 0.95) 0%, rgba(10, 28, 22, 0.6) 60%, transparent 100%);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 8;
+  pointer-events: none;
+}
+
+.encounters-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.encounters-name-row h2 {
+  font-size: 26px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.encounters-verified-badge {
+  background: #0ca678;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+
+.encounters-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  opacity: 0.95;
+  flex-wrap: wrap;
+}
+
+.church-tag {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.encounters-bio {
+  font-size: 14px;
+  line-height: 1.45;
+  opacity: 0.9;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.encounters-interests {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.interest-pill {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 10px;
+}
+
+/* BOTONES DE ACCIÓN FLOTANTES DE BADOO (✕, ⭐, ❤️) */
+
+.badoo-actions-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  padding: 20px 10px 24px;
+  background: #ffffff;
+}
+
+.badoo-action-btn {
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+}
+
+.badoo-action-btn:hover {
+  transform: scale(1.12);
+}
+
+.badoo-action-btn:active {
+  transform: scale(0.95);
+}
+
+.btn-dislike {
+  width: 58px;
+  height: 58px;
+  background: #ffffff;
+  border: 2px solid #ff6b6b;
+  color: #ff6b6b;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.btn-dislike:hover {
+  background: #ff6b6b;
+  color: #ffffff;
+  box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+}
+
+.btn-superlike {
+  width: 50px;
+  height: 50px;
+  background: #ffffff;
+  border: 2px solid #845ef7;
+  color: #845ef7;
+  font-size: 22px;
+}
+
+.btn-superlike:hover {
+  background: #845ef7;
+  color: #ffffff;
+  box-shadow: 0 10px 25px rgba(132, 94, 247, 0.3);
+}
+
+.btn-like {
+  width: 68px;
+  height: 68px;
+  background: #087f5b;
+  color: #ffffff;
+  font-size: 32px;
+  box-shadow: 0 12px 28px rgba(8, 127, 91, 0.35);
+}
+
+.btn-like:hover {
+  background: #066b4d;
+  transform: scale(1.15);
+  box-shadow: 0 15px 35px rgba(8, 127, 91, 0.45);
+}
+
+.encounters-keyboard-tip {
+  margin-top: 15px;
+  font-size: 13px;
+  color: #71847d;
+  text-align: center;
+}
+
+.encounters-empty-card {
+  text-align: center;
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 60px 30px;
+  border: 1px solid #e1ece7;
+  max-width: 480px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.encounters-empty-icon {
+  font-size: 50px;
+  margin-bottom: 12px;
+}
+
+.encounters-empty-card h3 {
+  font-size: 22px;
+  color: #17352d;
+  margin-bottom: 8px;
+}
+
+.encounters-empty-card p {
+  color: #5c716a;
+  margin-bottom: 24px;
+}
+
+/* BOTONES MINI EN LA CUADRÍCULA */
+
+.badoo-grid-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+}
+
+.badoo-mini-btn {
+  border-radius: 18px;
+  border: 1px solid #d7e4df;
+  background: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 8px 12px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.mini-dislike {
+  color: #ff6b6b;
+  border-color: #ffd8d8;
+}
+
+.mini-dislike:hover {
+  background: #ffe3e3;
+}
+
+.mini-superlike {
+  color: #845ef7;
+  border-color: #d0bfff;
+}
+
+.mini-superlike:hover {
+  background: #f3f0ff;
+}
+
+.mini-like {
+  flex: 1;
+  background: #087f5b;
+  color: #ffffff;
+  border-color: #087f5b;
+  text-align: center;
+}
+
+.mini-like:hover {
+  background: #066b4d;
+}
+
+.mini-like.liked {
+  background: #dff5ec;
+  color: #087f5b;
+  border-color: #087f5b;
+}
+
+.badoo-match-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: #087f5b;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.match-highlight-card {
+  border: 2px solid #20c997;
+}
+
+/* ==========================================================
+   MODAL DE MATCH (¡ES UNA CONEXIÓN CON PROPÓSITO!)
+   ========================================================== */
+
+.match-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 28, 22, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1500;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.match-modal-card {
+  background: linear-gradient(135deg, #ffffff, #f2fbf7);
+  border-radius: 32px;
+  padding: 40px 30px;
+  max-width: 460px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+  animation: matchPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes matchPop {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.match-sparkles {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.match-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #087f5b;
+  margin-bottom: 8px;
+}
+
+.match-subtitle {
+  color: #5c716a;
+  font-size: 15px;
+  line-height: 1.5;
+  margin-bottom: 25px;
+}
+
+.match-avatars-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin: 20px 0 25px;
+}
+
+.match-avatar-circle {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #ffffff;
+  box-shadow: 0 10px 25px rgba(8, 127, 91, 0.25);
+}
+
+.match-avatar-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.match-avatar-circle:first-child {
+  transform: translateX(12px);
+  z-index: 1;
+}
+
+.match-avatar-circle:last-child {
+  transform: translateX(-12px);
+  z-index: 2;
+}
+
+.match-heart-badge {
+  position: absolute;
+  z-index: 3;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #087f5b;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 3px solid #ffffff;
+  animation: pulseHeart 1.5s infinite;
+}
+
+@keyframes pulseHeart {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+.match-church-info {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #087f5b;
+  background: #eef8f4;
+  padding: 8px 16px;
+  border-radius: 20px;
+  margin-bottom: 25px;
+}
+
+.match-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.match-chat-btn {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+}
+
+.match-keep-btn {
+  width: 100%;
+  border: 1px solid #d7e4df;
+}

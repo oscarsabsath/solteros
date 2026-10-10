@@ -2,37 +2,75 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabaseService } from '../services/supabaseService';
 import PhotoUploader from './PhotoUploader';
+import Encounters from './Encounters';
+import MatchModal from './MatchModal';
 
 export default function Dashboard() {
   const { user, logout, isConfigured } = useAuth();
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [connections, setConnections] = useState([]);
+  const [matches, setMatches] = useState([]);
+  const [likedIds, setLikedIds] = useState([]);
+
+  // Match Modal state
+  const [isMatchModalOpen, setIsMatchModalOpen] = useState(false);
+  const [currentMatchedProfile, setCurrentMatchedProfile] = useState(null);
 
   // User profile photos state
-  const [myPhotos, setMyPhotos] = useState(user?.profile?.photos || (user?.profile?.avatar_url ? [user?.profile?.avatar_url] : []));
+  const [myPhotos, setMyPhotos] = useState(
+    user?.profile?.photos || (user?.profile?.avatar_url ? [user?.profile?.avatar_url] : [])
+  );
 
   // Filters
   const [genderFilter, setGenderFilter] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'connections' | 'profile'
+  const [activeTab, setActiveTab] = useState('encounters'); // 'encounters' | 'feed' | 'matches' | 'profile'
 
   useEffect(() => {
     async function loadData() {
       setLoading(true);
       const list = await supabaseService.getProfiles();
-      // Filtrar el perfil propio para no mostrarse a sí mismo en el feed
+      // Filtrar el perfil propio para no mostrarse a sí mismo
       const filtered = list.filter((p) => p.id !== user?.id && p.email !== user?.email);
       setProfiles(filtered);
       setConnections(supabaseService.getConnections());
+      setMatches(supabaseService.getMatches());
+      setLikedIds(supabaseService.getLikes());
       setLoading(false);
     }
     loadData();
   }, [user]);
 
-  const handleConnect = async (profileId) => {
-    const updated = await supabaseService.connectWith(profileId);
-    setConnections([...updated]);
+  // Manejador de Like estilo Badoo
+  const handleLike = async (targetProfile) => {
+    const res = await supabaseService.likeProfile(targetProfile.id);
+    setLikedIds((prev) => [...new Set([...prev, targetProfile.id])]);
+    setConnections(supabaseService.getConnections());
+
+    if (res.isMatch) {
+      setMatches((prev) => [...new Set([...prev, targetProfile.id])]);
+      setCurrentMatchedProfile(targetProfile);
+      setIsMatchModalOpen(true);
+    }
+  };
+
+  // Manejador de Dislike estilo Badoo
+  const handleDislike = async (targetProfile) => {
+    await supabaseService.dislikeProfile(targetProfile.id);
+  };
+
+  // Manejador de Super Like estilo Badoo
+  const handleSuperLike = async (targetProfile) => {
+    const res = await supabaseService.superLikeProfile(targetProfile.id);
+    setLikedIds((prev) => [...new Set([...prev, targetProfile.id])]);
+    setConnections(supabaseService.getConnections());
+
+    if (res.isMatch) {
+      setMatches((prev) => [...new Set([...prev, targetProfile.id])]);
+      setCurrentMatchedProfile(targetProfile);
+      setIsMatchModalOpen(true);
+    }
   };
 
   const handleUpdateMyPhotos = (updatedPhotos) => {
@@ -55,29 +93,35 @@ export default function Dashboard() {
     return matchesGender && matchesSearch;
   });
 
-  const connectedProfiles = profiles.filter((p) => connections.includes(p.id));
+  const matchedProfilesList = profiles.filter((p) => matches.includes(p.id));
 
   return (
     <div className="dashboard-container">
-      {/* Barra superior de la aplicación */}
+      {/* BARRA SUPERIOR DE NAVEGACIÓN ESTILO BADOO */}
       <header className="dashboard-header">
         <div className="dashboard-brand">
           <div className="logo">Solteros Adventistas</div>
-          <span className="platform-tag">Comunidad</span>
+          <span className="platform-tag">Badoo Edition</span>
         </div>
 
         <nav className="dashboard-nav">
           <button
+            className={`nav-tab-btn ${activeTab === 'encounters' ? 'active' : ''}`}
+            onClick={() => setActiveTab('encounters')}
+          >
+            🃏 Encuentros
+          </button>
+          <button
             className={`nav-tab-btn ${activeTab === 'feed' ? 'active' : ''}`}
             onClick={() => setActiveTab('feed')}
           >
-            👥 Explorar Personas
+            👥 Explorar ({profiles.length})
           </button>
           <button
-            className={`nav-tab-btn ${activeTab === 'connections' ? 'active' : ''}`}
-            onClick={() => setActiveTab('connections')}
+            className={`nav-tab-btn ${activeTab === 'matches' ? 'active' : ''}`}
+            onClick={() => setActiveTab('matches')}
           >
-            ♥ Mis Conexiones ({connections.length})
+            ♥ Matches & Likes ({matches.length})
           </button>
           <button
             className={`nav-tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
@@ -93,17 +137,17 @@ export default function Dashboard() {
           ) : (
             <div className="user-nav-avatar-fallback">👤</div>
           )}
-          <span className="user-name">Hola, {user?.profile?.full_name || user?.email}</span>
+          <span className="user-name">Hola, {user?.profile?.full_name?.split(' ')[0] || user?.email?.split('@')[0]}</span>
           <button onClick={logout} className="logout-btn">
-            Cerrar sesión
+            Salir
           </button>
         </div>
       </header>
 
-      {/* Banner de estado de la base de datos */}
+      {/* BANNER DE ESTADO */}
       {!isConfigured ? (
         <div className="status-banner local-banner">
-          <span>🟢 <strong>Modo Demostración Activo:</strong> La plataforma está guardando fotos y perfiles de forma interactiva.</span>
+          <span>🟢 <strong>Modo Interactivo:</strong> Sistema de Likes, Matches y fotos activo.</span>
         </div>
       ) : (
         <div className="status-banner cloud-banner">
@@ -111,7 +155,28 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* VISTA 1: FEED DE PERFILES ESTILO BADOO */}
+      {/* VISTA 1: ENCUENTROS ESTILO BADOO (DESLIZAR / DAR LIKE ✕ ⭐ ♥) */}
+      {activeTab === 'encounters' && (
+        <main className="dashboard-main encounters-page">
+          <div className="encounters-section-header">
+            <h2>Encuentros con Propósito</h2>
+            <p>Descubre personas una a una. Pulsa <strong>♥</strong> para dar like o <strong>✕</strong> para pasar.</p>
+          </div>
+
+          {loading ? (
+            <div className="loading-state">Cargando perfiles...</div>
+          ) : (
+            <Encounters
+              profiles={filteredProfiles}
+              onLike={handleLike}
+              onDislike={handleDislike}
+              onSuperLike={handleSuperLike}
+            />
+          )}
+        </main>
+      )}
+
+      {/* VISTA 2: EXPLORAR CUADRÍCULA DE PERFILES */}
       {activeTab === 'feed' && (
         <main className="dashboard-main">
           <div className="dashboard-toolbar">
@@ -157,13 +222,13 @@ export default function Dashboard() {
           ) : (
             <div className="profiles-grid">
               {filteredProfiles.map((p) => {
-                const isConnected = connections.includes(p.id);
+                const isLiked = likedIds.includes(p.id);
+                const isMatched = matches.includes(p.id);
                 const photoSrc = p.avatar_url || (p.photos && p.photos[0]);
                 const photoCount = p.photos ? p.photos.length : (p.avatar_url ? 1 : 0);
 
                 return (
                   <article key={p.id} className="user-card badoo-card">
-                    {/* FOTO ESTILO BADOO CON ASPECT RATIO */}
                     <div className="badoo-card-photo-wrap">
                       {photoSrc ? (
                         <img
@@ -173,16 +238,15 @@ export default function Dashboard() {
                           loading="lazy"
                         />
                       ) : (
-                        <div
-                          className="card-avatar-placeholder"
-                          style={{ backgroundColor: p.avatar_color || '#087f5b' }}
-                        >
-                          {p.full_name?.charAt(0) || '👤'}
-                        </div>
+                        <div className="card-avatar-placeholder">👤</div>
                       )}
 
                       {photoCount > 1 && (
                         <span className="badoo-photo-badge">📷 {photoCount} fotos</span>
+                      )}
+
+                      {isMatched && (
+                        <span className="badoo-match-badge">✨ Match con Propósito</span>
                       )}
 
                       <div className="badoo-photo-gradient-overlay">
@@ -209,12 +273,29 @@ export default function Dashboard() {
                       )}
                     </div>
 
-                    <div className="card-footer">
+                    <div className="card-footer badoo-grid-footer">
                       <button
-                        className={`connect-btn ${isConnected ? 'connected' : ''}`}
-                        onClick={() => handleConnect(p.id)}
+                        className={`badoo-mini-btn mini-dislike`}
+                        onClick={() => handleDislike(p)}
+                        title="Pasar"
                       >
-                        {isConnected ? '✓ Solicitud enviada' : '♥ Conectar con propósito'}
+                        ✕
+                      </button>
+
+                      <button
+                        className={`badoo-mini-btn mini-superlike`}
+                        onClick={() => handleSuperLike(p)}
+                        title="Super Like"
+                      >
+                        ★
+                      </button>
+
+                      <button
+                        className={`badoo-mini-btn mini-like ${isLiked ? 'liked' : ''}`}
+                        onClick={() => handleLike(p)}
+                        title="Dar Like"
+                      >
+                        ♥ {isLiked ? 'Te gusta' : 'Me gusta'}
                       </button>
                     </div>
                   </article>
@@ -225,32 +306,34 @@ export default function Dashboard() {
         </main>
       )}
 
-      {/* VISTA 2: MIS CONEXIONES */}
-      {activeTab === 'connections' && (
+      {/* VISTA 3: MATCHES & LIKES */}
+      {activeTab === 'matches' && (
         <main className="dashboard-main">
-          <h2>Tus Conexiones con Propósito</h2>
-          <p className="subheading">Personas con las que has mostrado interés mutuo.</p>
+          <h2>Tus Matches y Conexiones con Propósito</h2>
+          <p className="subheading">Personas a las que les gustas y con las que hay interés mutuo.</p>
 
-          {connectedProfiles.length === 0 ? (
+          {matchedProfilesList.length === 0 ? (
             <div className="empty-state">
-              <h3>Aún no has conectado con nadie</h3>
-              <p>Ve a "Explorar Personas" y pulsa en "♥ Conectar con propósito" para iniciar conversaciones.</p>
-              <button className="primary-btn" onClick={() => setActiveTab('feed')}>
-                Explorar Personas
+              <div className="empty-state-icon">💌</div>
+              <h3>Aún no tienes ningún match mutuo</h3>
+              <p>Ve a "Encuentros" o "Explorar" y dale <strong>♥ Me gusta</strong> a los perfiles que compartan tus valores para conectar.</p>
+              <button className="primary-btn" onClick={() => setActiveTab('encounters')}>
+                Ir a Encuentros
               </button>
             </div>
           ) : (
             <div className="profiles-grid">
-              {connectedProfiles.map((p) => {
+              {matchedProfilesList.map((p) => {
                 const photoSrc = p.avatar_url || (p.photos && p.photos[0]);
                 return (
-                  <article key={p.id} className="user-card badoo-card">
+                  <article key={p.id} className="user-card badoo-card match-highlight-card">
                     <div className="badoo-card-photo-wrap">
                       {photoSrc ? (
                         <img src={photoSrc} alt={p.full_name} className="badoo-card-photo" />
                       ) : (
                         <div className="card-avatar-placeholder">👤</div>
                       )}
+                      <span className="badoo-match-badge">🎉 ¡Conexión Mutua!</span>
                       <div className="badoo-photo-gradient-overlay">
                         <h3>{p.full_name}, {p.age}</h3>
                         <span className="badoo-location-text">📍 {p.city}, {p.country}</span>
@@ -261,8 +344,11 @@ export default function Dashboard() {
                       <p className="card-bio">{p.bio}</p>
                     </div>
                     <div className="card-footer">
-                      <button className="primary-btn message-btn" onClick={() => alert(`Iniciando chat privado con ${p.full_name}...`)}>
-                        💬 Iniciar Conversación
+                      <button
+                        className="primary-btn message-btn"
+                        onClick={() => alert(`Abriendo chat con ${p.full_name}...`)}
+                      >
+                        💬 Enviar Mensaje con Propósito
                       </button>
                     </div>
                   </article>
@@ -273,14 +359,13 @@ export default function Dashboard() {
         </main>
       )}
 
-      {/* VISTA 3: MI PERFIL CON GALERÍA DE FOTOS BADOO */}
+      {/* VISTA 4: MI PERFIL CON GALERÍA DE FOTOS BADOO */}
       {activeTab === 'profile' && (
         <main className="dashboard-main">
           <div className="my-profile-card">
             <h2>Mi Perfil & Galería de Fotos</h2>
             <p className="subheading">Gestiona tus 6 fotos de perfil y tus datos visibles para la comunidad.</p>
 
-            {/* GESTOR DE FOTOS ESTILO BADOO */}
             <div className="profile-photos-manager">
               <PhotoUploader
                 photos={myPhotos}
@@ -336,6 +421,17 @@ export default function Dashboard() {
           </div>
         </main>
       )}
+
+      {/* MODAL DE CELEBRACIÓN DE MATCH ESTILO BADOO */}
+      <MatchModal
+        isOpen={isMatchModalOpen}
+        matchedProfile={currentMatchedProfile}
+        userProfile={user?.profile}
+        onClose={() => setIsMatchModalOpen(false)}
+        onOpenChat={(profile) => {
+          alert(`Iniciando chat privado con ${profile.full_name}`);
+        }}
+      />
     </div>
   );
 }

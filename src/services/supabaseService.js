@@ -307,8 +307,78 @@ export const supabaseService = {
   },
 
   /**
-   * Conectar / Enviar like con propósito
+   * Conectar / Enviar like con propósito (Estilo Badoo)
    */
+  async likeProfile(targetProfileId) {
+    const savedLikes = JSON.parse(localStorage.getItem('solteros_adv_likes') || '[]');
+    if (!savedLikes.includes(targetProfileId)) {
+      savedLikes.push(targetProfileId);
+      localStorage.setItem('solteros_adv_likes', JSON.stringify(savedLikes));
+    }
+
+    // Actualizar conexiones
+    await this.connectWith(targetProfileId);
+
+    // Simular coincidencia mutua (Match) para una experiencia Badoo real
+    const savedMatches = JSON.parse(localStorage.getItem('solteros_adv_matches') || '[]');
+    const isMatch = !savedMatches.includes(targetProfileId);
+    if (isMatch) {
+      savedMatches.push(targetProfileId);
+      localStorage.setItem('solteros_adv_matches', JSON.stringify(savedMatches));
+    }
+
+    return { success: true, isMatch };
+  },
+
+  /**
+   * Pasar perfil (Dislike)
+   */
+  async dislikeProfile(targetProfileId) {
+    const savedDislikes = JSON.parse(localStorage.getItem('solteros_adv_dislikes') || '[]');
+    if (!savedDislikes.includes(targetProfileId)) {
+      savedDislikes.push(targetProfileId);
+      localStorage.setItem('solteros_adv_dislikes', JSON.stringify(savedDislikes));
+    }
+    return { success: true };
+  },
+
+  /**
+   * Super Conexión (Super Like)
+   */
+  async superLikeProfile(targetProfileId) {
+    const savedSuperLikes = JSON.parse(localStorage.getItem('solteros_adv_superlikes') || '[]');
+    if (!savedSuperLikes.includes(targetProfileId)) {
+      savedSuperLikes.push(targetProfileId);
+      localStorage.setItem('solteros_adv_superlikes', JSON.stringify(savedSuperLikes));
+    }
+
+    await this.connectWith(targetProfileId);
+
+    const savedMatches = JSON.parse(localStorage.getItem('solteros_adv_matches') || '[]');
+    if (!savedMatches.includes(targetProfileId)) {
+      savedMatches.push(targetProfileId);
+      localStorage.setItem('solteros_adv_matches', JSON.stringify(savedMatches));
+    }
+
+    return { success: true, isMatch: true };
+  },
+
+  getMatches() {
+    try {
+      return JSON.parse(localStorage.getItem('solteros_adv_matches') || '[]');
+    } catch {
+      return [];
+    }
+  },
+
+  getLikes() {
+    try {
+      return JSON.parse(localStorage.getItem('solteros_adv_likes') || '[]');
+    } catch {
+      return [];
+    }
+  },
+
   async connectWith(targetProfileId) {
     const saved = localStorage.getItem(MOCK_STORAGE_KEY_CONNECTIONS) || '[]';
     const connections = JSON.parse(saved);
