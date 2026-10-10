@@ -1166,3 +1166,370 @@ footer {
 .auth-separator span {
   padding: 0 12px;
 }
+
+
+/* ==========================================================
+   ESTILO BADOO: SUBIDA DE FOTOS Y ONBOARDING WIZARD
+   ========================================================== */
+
+.modal-card-large {
+  max-width: 620px;
+}
+
+.onboarding-wizard {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.wizard-progress-header {
+  margin-bottom: 8px;
+}
+
+.wizard-step-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #5c716a;
+  margin-bottom: 8px;
+}
+
+.wizard-step-info strong {
+  color: #087f5b;
+  font-size: 14px;
+}
+
+.wizard-progress-track {
+  width: 100%;
+  height: 6px;
+  background: #eef4f1;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.wizard-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #087f5b, #20c997);
+  transition: width 0.3s ease;
+}
+
+.wizard-step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.wizard-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.wizard-next-btn {
+  margin-left: auto;
+  min-width: 170px;
+}
+
+.wizard-back-btn {
+  border: 1px solid #d7e4df;
+}
+
+/* CUADRÍCULA DE FOTOS (ESTILO BADOO 3x2) */
+
+.badoo-uploader-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.badoo-grid-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.badoo-grid-header h4 {
+  font-size: 16px;
+  color: #17352d;
+}
+
+.badoo-photos-count {
+  font-size: 13px;
+  font-weight: 700;
+  color: #087f5b;
+  background: #dff5ec;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.badoo-hint {
+  font-size: 13px;
+  color: #5c716a;
+  margin-top: -6px;
+}
+
+.badoo-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.badoo-photo-slot {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: 18px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px dashed #cfded8;
+  background: #f7faf8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.badoo-photo-slot:hover {
+  border-color: #087f5b;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(8, 127, 91, 0.1);
+}
+
+.badoo-photo-slot.slot-main {
+  border-color: #087f5b;
+  background: #eef8f4;
+}
+
+.badoo-photo-slot.has-photo {
+  border: none;
+  background: #000;
+}
+
+.slot-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.slot-badge-main {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #087f5b;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.slot-remove-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  border: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.slot-remove-btn:hover {
+  background: #c92a2a;
+}
+
+.slot-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: #71847d;
+  text-align: center;
+  padding: 10px;
+}
+
+.slot-add-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #cfded8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: #087f5b;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.slot-add-text {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badoo-tip-box {
+  background: #fbfdfc;
+  border: 1px solid #e1ece7;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-size: 13px;
+  color: #45645b;
+  line-height: 1.45;
+}
+
+/* NUBE DE CHIPS / INTERESES ESTILO BADOO */
+
+.badoo-chips-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.badoo-chip {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid #d7e4df;
+  background: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3b5049;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.badoo-chip:hover {
+  border-color: #087f5b;
+  background: #f2fbf7;
+}
+
+.badoo-chip.selected {
+  background: #087f5b;
+  color: #ffffff;
+  border-color: #087f5b;
+  box-shadow: 0 4px 10px rgba(8, 127, 91, 0.2);
+}
+
+/* AVATAR DE NAVEGACIÓN */
+
+.user-nav-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #087f5b;
+}
+
+.user-nav-avatar-fallback {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #dff5ec;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+/* TARJETAS DEL FEED ESTILO BADOO */
+
+.badoo-card {
+  border: 1px solid #e2ece7;
+  border-radius: 26px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+}
+
+.badoo-card-photo-wrap {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  background: #eef3f0;
+  overflow: hidden;
+}
+
+.badoo-card-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.badoo-card:hover .badoo-card-photo {
+  transform: scale(1.03);
+}
+
+.card-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 64px;
+  color: white;
+}
+
+.badoo-photo-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  backdrop-filter: blur(4px);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badoo-photo-gradient-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 40px 18px 16px;
+  background: linear-gradient(to top, rgba(14, 38, 30, 0.9) 0%, rgba(14, 38, 30, 0.4) 60%, transparent 100%);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.badoo-photo-gradient-overlay h3 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.badoo-location-text {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.profile-photos-manager {
+  margin: 20px 0;
+}
+
+.profile-divider {
+  border: none;
+  border-top: 1px solid #eef3f0;
+  margin: 25px 0;
+}
+
+@media (max-width: 600px) {
+  .badoo-photo-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

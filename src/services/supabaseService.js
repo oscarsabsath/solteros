@@ -17,7 +17,7 @@ const MOCK_STORAGE_KEY_USER = 'solteros_adv_user';
 const MOCK_STORAGE_KEY_PROFILES = 'solteros_adv_profiles';
 const MOCK_STORAGE_KEY_CONNECTIONS = 'solteros_adv_connections';
 
-// Perfiles adventistas de demostración
+// Perfiles adventistas de demostración con fotos estilo Badoo
 const INITIAL_DEMO_PROFILES = [
   {
     id: 'demo-1',
@@ -28,8 +28,12 @@ const INITIAL_DEMO_PROFILES = [
     city: 'Madrid',
     church_name: 'IASD Alenza',
     bio: 'Apasionada por la música sacra y la cocina saludable. Líder de jóvenes en mi iglesia. Busco a alguien con quien compartir la fe y servir juntos.',
-    interests: ['Música', 'Naturaleza', 'Misión'],
-    avatar_color: '#087f5b',
+    interests: ['Música Sacra / Canto', 'Vida Saludable & Nutrición', 'Misiones & Voluntariado'],
+    avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&auto=format&fit=crop&q=80',
+    photos: [
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&auto=format&fit=crop&q=80',
+    ],
   },
   {
     id: 'demo-2',
@@ -40,8 +44,12 @@ const INITIAL_DEMO_PROFILES = [
     city: 'Barcelona',
     church_name: 'IASD Guinardó',
     bio: 'Ingeniero, amante del senderismo y el estudio de las profecías bíblicas. Busco una compañera de vida con metas espirituales claras.',
-    interests: ['Montañismo', 'Tecnología', 'Club de Conquistadores'],
-    avatar_color: '#099268',
+    interests: ['Senderismo en la Naturaleza', 'Estudio Bíblico Profundo', 'Club de Conquistadores'],
+    avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=80',
+    photos: [
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&auto=format&fit=crop&q=80',
+    ],
   },
   {
     id: 'demo-3',
@@ -52,8 +60,11 @@ const INITIAL_DEMO_PROFILES = [
     city: 'Medellín',
     church_name: 'IASD El Poblado',
     bio: 'Docente de educación infantil. Guía Mayor investida. Disfruto de los paseos al aire libre en sábado y de leer libros devocionales.',
-    interests: ['Conquistadores', 'Lectura', 'Educación'],
-    avatar_color: '#20c997',
+    interests: ['Club de Conquistadores', 'Lectura & Crecimiento', 'Educación Adventista'],
+    avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80',
+    photos: [
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80',
+    ],
   },
   {
     id: 'demo-4',
@@ -64,8 +75,11 @@ const INITIAL_DEMO_PROFILES = [
     city: 'Monterrey',
     church_name: 'IASD Central',
     bio: 'Médico misionero, apasionado por el mensaje pro-salud. Me encanta servir en brigadas médicas y compartir el amor de Jesús.',
-    interests: ['Salud', 'Misiones', 'Fotografía'],
-    avatar_color: '#0ca678',
+    interests: ['Vida Saludable & Nutrición', 'Misiones & Voluntariado', 'Deporte & Aire Libre'],
+    avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&auto=format&fit=crop&q=80',
+    photos: [
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&auto=format&fit=crop&q=80',
+    ],
   },
   {
     id: 'demo-5',
@@ -76,8 +90,11 @@ const INITIAL_DEMO_PROFILES = [
     city: 'Buenos Aires',
     church_name: 'IASD Palermo',
     bio: 'Diseñadora gráfica, colaboro con el ministerio de comunicaciones. Enamorada de Dios y de su creación. Busco una amistad sincera que crezca con propósito.',
-    interests: ['Arte', 'Comunicaciones', 'Voluntariado'],
-    avatar_color: '#087f5b',
+    interests: ['Medios & Comunicaciones', 'Familia & Proyectos de Vida', 'Música Sacra / Canto'],
+    avatar_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&auto=format&fit=crop&q=80',
+    photos: [
+      'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&auto=format&fit=crop&q=80',
+    ],
   },
 ];
 
