@@ -184,6 +184,37 @@ export default function Encounters({ profiles = [], onLike, onDislike, onSuperLi
               )}
             </div>
 
+            {/* ATRIBUTOS CLAVE (ESTATURA, DIETA, ETNIA, HABITOS) */}
+            <div className="tinder-traits-cloud">
+              {currentProfile.height && (
+                <span className="trait-tag" title="Estatura">📏 {currentProfile.height}</span>
+              )}
+              {currentProfile.diet && (
+                <span className="trait-tag" title="Dieta">🥗 {currentProfile.diet}</span>
+              )}
+              {currentProfile.ethnicity && (
+                <span className="trait-tag" title="Etnia">🧬 {currentProfile.ethnicity}</span>
+              )}
+              {currentProfile.weight && showFullInfo && (
+                <span className="trait-tag" title="Complexión / Peso">⚖️ {currentProfile.weight}</span>
+              )}
+              {currentProfile.smokes === 'No' && (
+                <span className="trait-tag" title="No fuma">🚭 No fuma</span>
+              )}
+              {currentProfile.drinks === 'No' && (
+                <span className="trait-tag" title="No bebe">🍷 No bebe</span>
+              )}
+              {currentProfile.marital_status && showFullInfo && (
+                <span className="trait-tag" title="Estado civil">💍 {currentProfile.marital_status}</span>
+              )}
+              {currentProfile.occupation && (
+                <span className="trait-tag" title="Ocupación">💼 {currentProfile.occupation}</span>
+              )}
+              {currentProfile.baptized === 'Sí' && (
+                <span className="trait-tag" title="Bautizado adventista">💧 Bautizado/a</span>
+              )}
+            </div>
+
             {/* VISTA RESUMIDA O EXPANDIDA DE LA BIOGRAFÍA */}
             <p className={`tinder-bio ${showFullInfo ? 'expanded' : ''}`}>
               {currentProfile.bio || 'Miembro activo adventista con metas de vida claras y fe compartida.'}

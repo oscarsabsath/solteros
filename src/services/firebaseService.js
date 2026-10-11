@@ -78,6 +78,18 @@ export const firebaseService = {
         avatar_url: toFirestoreValue(profileData.avatar_url || (profileData.photos && profileData.photos[0]) || ''),
         photos: toFirestoreValue(profileData.photos || []),
         interests: toFirestoreValue(profileData.interests || []),
+        height: toFirestoreValue(profileData.height || ''),
+        weight: toFirestoreValue(profileData.weight || ''),
+        ethnicity: toFirestoreValue(profileData.ethnicity || ''),
+        smokes: toFirestoreValue(profileData.smokes || 'No'),
+        drinks: toFirestoreValue(profileData.drinks || 'No'),
+        diet: toFirestoreValue(profileData.diet || 'Vegetariana'),
+        marital_status: toFirestoreValue(profileData.marital_status || 'Soltero/a'),
+        has_children: toFirestoreValue(profileData.has_children || 'No'),
+        wants_children: toFirestoreValue(profileData.wants_children || 'Sí'),
+        education: toFirestoreValue(profileData.education || ''),
+        occupation: toFirestoreValue(profileData.occupation || ''),
+        baptized: toFirestoreValue(profileData.baptized || 'Sí'),
         updated_at: toFirestoreValue(new Date().toISOString()),
       };
 

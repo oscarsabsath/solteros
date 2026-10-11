@@ -44,6 +44,13 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'register' }) 
     churchName: '',
     bio: '',
     interests: ['Música Sacra / Canto', 'Vida Saludable & Nutrición'],
+    height: '1.70 m',
+    weight: 'Media',
+    ethnicity: 'Hispano / Latino',
+    smokes: 'No',
+    drinks: 'No',
+    diet: 'Vegetariana',
+    marital_status: 'Soltero/a',
   });
 
   if (!isOpen) return null;
@@ -428,6 +435,73 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'register' }) 
                         setRegisterData({ ...registerData, churchName: e.target.value })
                       }
                     />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Estatura</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: 1.70 m"
+                      value={registerData.height}
+                      onChange={(e) =>
+                        setRegisterData({ ...registerData, height: e.target.value })
+                      }
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Etnia / Origen</label>
+                    <select
+                      value={registerData.ethnicity}
+                      onChange={(e) =>
+                        setRegisterData({ ...registerData, ethnicity: e.target.value })
+                      }
+                    >
+                      <option value="Hispano / Latino">Hispano / Latino</option>
+                      <option value="Caucásico / Blanco">Caucásico / Blanco</option>
+                      <option value="Afrodescendiente">Afrodescendiente</option>
+                      <option value="Mestizo">Mestizo</option>
+                      <option value="Indígena">Indígena</option>
+                      <option value="Asiático">Asiático</option>
+                      <option value="Otro">Otro / Prefiero no decir</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Alimentación / Dieta</label>
+                    <select
+                      value={registerData.diet}
+                      onChange={(e) =>
+                        setRegisterData({ ...registerData, diet: e.target.value })
+                      }
+                    >
+                      <option value="Vegetariana">Vegetariana</option>
+                      <option value="Vegana">Vegana</option>
+                      <option value="Ovolactovegetariana">Ovolactovegetariana</option>
+                      <option value="Bíblica limpia (Levítico 11)">Bíblica limpia (Levítico 11)</option>
+                      <option value="Sin restricciones">Sin restricciones</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>¿Fuma o Bebe alcohol?</label>
+                    <select
+                      value={registerData.smokes === 'No' && registerData.drinks === 'No' ? 'No' : 'Otro'}
+                      onChange={(e) => {
+                        if (e.target.value === 'No') {
+                          setRegisterData({ ...registerData, smokes: 'No', drinks: 'No' });
+                        } else {
+                          setRegisterData({ ...registerData, smokes: 'Rara vez', drinks: 'Ocasionalmente' });
+                        }
+                      }}
+                    >
+                      <option value="No">No fumo ni bebo (Abstemio/a)</option>
+                      <option value="Otro">Otro estilo</option>
+                    </select>
                   </div>
                 </div>
 

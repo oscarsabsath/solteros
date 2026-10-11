@@ -554,23 +554,323 @@ footer {
   border: 2px solid #ffffff;
 }
 
-.tinder-logout-btn {
-  background: #f1f5f3;
-  border: none;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  color: var(--text-muted);
-  font-size: 14px;
+/* HEADER USER CORNER & LOGOUT */
+.header-ai-launcher-btn {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #1098ad 0%, #087f5b 100%);
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 3px 10px rgba(8, 127, 91, 0.2);
+}
+
+.header-ai-launcher-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(8, 127, 91, 0.3);
+}
+
+.tinder-logout-btn {
+  background: #fff5f5;
+  border: 1px solid #ffc9c9;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  color: #c92a2a;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
   transition: all 0.2s;
 }
 
 .tinder-logout-btn:hover {
   background: #ffe3e3;
-  color: #e03131;
+  color: #b02525;
+  border-color: #ffa8a8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(201, 42, 42, 0.12);
+}
+
+.logout-icon {
+  font-size: 15px;
+}
+
+.logout-btn-label {
+  font-size: 13px;
+}
+
+/* POST-LOGIN AI ONBOARDING BANNER */
+.post-login-ai-banner {
+  background: linear-gradient(135deg, #e6fcf5 0%, #ebfbee 100%);
+  border-bottom: 1px solid #b2f2bb;
+  padding: 14px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  animation: slideDownBanner 0.3s ease;
+  z-index: 100;
+}
+
+@keyframes slideDownBanner {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ai-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ai-banner-sparkle {
+  font-size: 26px;
+}
+
+.ai-banner-text strong {
+  display: block;
+  font-size: 15px;
+  color: #0b7252;
+  margin-bottom: 2px;
+}
+
+.ai-banner-text p {
+  font-size: 13px;
+  color: #2b8a3e;
+  margin: 0;
+}
+
+.ai-banner-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.ai-banner-btn-primary {
+  background: var(--primary);
+  color: #ffffff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 3px 10px rgba(8, 127, 91, 0.2);
+}
+
+.ai-banner-btn-primary:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.ai-banner-btn-secondary {
+  background: #ffffff;
+  color: var(--text-main);
+  border: 1px solid var(--border-light);
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ai-banner-btn-secondary:hover {
+  background: #f8f9fa;
+  border-color: #adb5bd;
+}
+
+.ai-banner-dismiss {
+  background: transparent;
+  border: none;
+  color: #82c91e;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.ai-banner-dismiss:hover {
+  color: #2b8a3e;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* AI CARD INSIDE MI PERFIL */
+.profile-ai-assistant-card {
+  background: linear-gradient(135deg, #1098ad 0%, #087f5b 100%);
+  color: #ffffff;
+  border-radius: 20px;
+  padding: 22px 24px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 8px 24px rgba(8, 127, 91, 0.2);
+}
+
+.ai-card-sparkle {
+  font-size: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ai-card-content {
+  flex: 1;
+}
+
+.ai-card-content h3 {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0 0 4px;
+  color: #ffffff;
+}
+
+.ai-card-content p {
+  font-size: 13.5px;
+  opacity: 0.92;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.ai-card-launch-btn {
+  background: #ffffff;
+  color: #087f5b;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  font-size: 13.5px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.ai-card-launch-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+
+/* EDIT FORM BLOCK HEADERS */
+.edit-block-header {
+  border-bottom: 1.5px solid #e9ecef;
+  padding-bottom: 6px;
+  margin-top: 14px;
+  margin-bottom: 6px;
+}
+
+.edit-block-header h4 {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--primary);
+  margin: 0;
+}
+
+/* TINDER TRAITS CLOUD IN ENCOUNTERS CARD */
+.tinder-traits-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.trait-tag {
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* PROFILE LOGOUT SECTION */
+.profile-logout-card {
+  margin-top: 24px;
+  border-top: 1px solid var(--border-light);
+  padding-top: 24px;
+}
+
+.logout-card-content {
+  background: #fff8f8;
+  border: 1.5px solid #ffc9c9;
+  border-radius: 20px;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.logout-card-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logout-status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #20c997;
+  display: inline-block;
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.25);
+}
+
+.logout-card-content h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 2px;
+}
+
+.logout-user-email {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.profile-large-logout-btn {
+  background: #e03131;
+  color: #ffffff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(224, 49, 49, 0.25);
+  flex-shrink: 0;
+}
+
+.profile-large-logout-btn:hover {
+  background: #c92a2a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(224, 49, 49, 0.35);
 }
 
 /* ==========================================================
@@ -2360,6 +2660,45 @@ footer {
   .trust-badges-bar {
     flex-direction: column;
     gap: 14px;
+  }
+
+  .post-login-ai-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .ai-banner-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .profile-ai-assistant-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 18px;
+    gap: 12px;
+  }
+
+  .logout-card-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .profile-large-logout-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .header-ai-launcher-btn .ai-btn-label {
+    display: none;
+  }
+
+  .tinder-logout-btn .logout-btn-label {
+    display: none;
   }
 }
 

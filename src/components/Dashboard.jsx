@@ -48,12 +48,25 @@ export default function Dashboard() {
     country: user?.profile?.country || '',
     age: user?.profile?.age || 25,
     gender: user?.profile?.gender || 'Hombre',
+    height: user?.profile?.height || '',
+    weight: user?.profile?.weight || '',
+    ethnicity: user?.profile?.ethnicity || 'Hispano / Latino',
+    smokes: user?.profile?.smokes || 'No',
+    drinks: user?.profile?.drinks || 'No',
+    diet: user?.profile?.diet || 'Vegetariana',
+    marital_status: user?.profile?.marital_status || 'Soltero/a',
+    has_children: user?.profile?.has_children || 'No',
+    wants_children: user?.profile?.wants_children || 'Sí',
+    education: user?.profile?.education || 'Universitario',
+    occupation: user?.profile?.occupation || '',
+    baptized: user?.profile?.baptized || 'Sí',
   });
   const [isSavingDetails, setIsSavingDetails] = useState(false);
   const [detailsSavedMessage, setDetailsSavedMessage] = useState('');
 
   // AI Assistant modal state in Dashboard
   const [showAiModalInDashboard, setShowAiModalInDashboard] = useState(false);
+  const [showProfileCompletionBanner, setShowProfileCompletionBanner] = useState(true);
 
   // Filters
   const [genderFilter, setGenderFilter] = useState('Todos');
@@ -69,6 +82,18 @@ export default function Dashboard() {
         country: user.profile.country || '',
         age: user.profile.age || 25,
         gender: user.profile.gender || 'Hombre',
+        height: user.profile.height || '',
+        weight: user.profile.weight || '',
+        ethnicity: user.profile.ethnicity || 'Hispano / Latino',
+        smokes: user.profile.smokes || 'No',
+        drinks: user.profile.drinks || 'No',
+        diet: user.profile.diet || 'Vegetariana',
+        marital_status: user.profile.marital_status || 'Soltero/a',
+        has_children: user.profile.has_children || 'No',
+        wants_children: user.profile.wants_children || 'Sí',
+        education: user.profile.education || 'Universitario',
+        occupation: user.profile.occupation || '',
+        baptized: user.profile.baptized || 'Sí',
       });
       if (user.profile.photos) {
         setMyPhotos(user.profile.photos);
@@ -167,9 +192,21 @@ export default function Dashboard() {
           country: editDetails.country,
           age: Number(editDetails.age),
           gender: editDetails.gender,
+          height: editDetails.height,
+          weight: editDetails.weight,
+          ethnicity: editDetails.ethnicity,
+          smokes: editDetails.smokes,
+          drinks: editDetails.drinks,
+          diet: editDetails.diet,
+          marital_status: editDetails.marital_status,
+          has_children: editDetails.has_children,
+          wants_children: editDetails.wants_children,
+          education: editDetails.education,
+          occupation: editDetails.occupation,
+          baptized: editDetails.baptized,
         });
       }
-      setDetailsSavedMessage('¡Datos actualizados con éxito!');
+      setDetailsSavedMessage('¡Datos actualizados con éxito en tu perfil y en la nube!');
       setIsEditingDetails(false);
       setTimeout(() => setDetailsSavedMessage(''), 4500);
     } catch (err) {
@@ -259,7 +296,21 @@ export default function Dashboard() {
         </nav>
 
         <div className="tinder-user-corner">
-          <div className="user-avatar-wrap" onClick={() => setActiveTab('profile')}>
+          <button
+            type="button"
+            className="header-ai-launcher-btn"
+            onClick={() => setShowAiModalInDashboard(true)}
+            title="Abrir Asistente IA para completar tu perfil"
+          >
+            <span className="ai-btn-icon">✨</span>
+            <span className="ai-btn-label">Asistente IA</span>
+          </button>
+
+          <div
+            className="user-avatar-wrap"
+            onClick={() => setActiveTab('profile')}
+            title="Ir a Mi Perfil"
+          >
             {myPhotos[0] ? (
               <img src={myPhotos[0]} alt="Avatar" className="tinder-nav-thumb" />
             ) : (
@@ -267,11 +318,55 @@ export default function Dashboard() {
             )}
             <span className="online-dot"></span>
           </div>
-          <button onClick={logout} className="tinder-logout-btn" title="Cerrar sesión">
-            ✕
+
+          <button
+            onClick={logout}
+            className="tinder-logout-btn"
+            title="Cerrar sesión"
+            aria-label="Cerrar sesión"
+          >
+            <span className="logout-icon">🚪</span>
+            <span className="logout-btn-label">Cerrar sesión</span>
           </button>
         </div>
       </header>
+
+      {/* BANNER PARA COMPLETAR PERFIL CON IA DESPUÉS DE LOGARSE / REGISTRARSE */}
+      {showProfileCompletionBanner && (!user?.profile?.height || !user?.profile?.bio || !user?.profile?.diet) && (
+        <aside className="post-login-ai-banner">
+          <div className="ai-banner-left">
+            <span className="ai-banner-sparkle">✨</span>
+            <div className="ai-banner-text">
+              <strong>Completa tu perfil con el Asistente IA</strong>
+              <p>Agrega tu estatura, estilo de vida, dieta adventista y hábitos con propósito para recibir más conexiones afines.</p>
+            </div>
+          </div>
+          <div className="ai-banner-right">
+            <button
+              type="button"
+              className="ai-banner-btn-primary"
+              onClick={() => setShowAiModalInDashboard(true)}
+            >
+              Completar con IA ➔
+            </button>
+            <button
+              type="button"
+              className="ai-banner-btn-secondary"
+              onClick={() => setActiveTab('profile')}
+            >
+              Llenar manualmente
+            </button>
+            <button
+              type="button"
+              className="ai-banner-dismiss"
+              onClick={() => setShowProfileCompletionBanner(false)}
+              title="Ocultar aviso"
+            >
+              ✕
+            </button>
+          </div>
+        </aside>
+      )}
 
       {/* VISTA 1: DESCUBRIR (TINDER CARD DECK) */}
       {activeTab === 'encounters' && (
@@ -489,10 +584,26 @@ export default function Dashboard() {
           <div className="profile-container-card">
             <div className="profile-hero-badge">
               <span className="avatar-letter">👤</span>
-              <div>
+              <div className="profile-hero-info">
                 <h2>{user?.profile?.full_name || 'Mi Perfil'}</h2>
                 <span>{user?.email}</span>
               </div>
+            </div>
+
+            {/* ASISTENTE IA DESTACADO PARA COMPLETAR EL PERFIL POST-LOGIN */}
+            <div className="profile-ai-assistant-card">
+              <div className="ai-card-sparkle">✨</div>
+              <div className="ai-card-content">
+                <h3>Asistente IA con Propósito</h3>
+                <p>¿Prefieres que la IA redacte tu biografía y complete tus datos en 1 minuto? Responde 4 preguntas y optimiza tu perfil.</p>
+              </div>
+              <button
+                type="button"
+                className="ai-card-launch-btn"
+                onClick={() => setShowAiModalInDashboard(true)}
+              >
+                Iniciar Asistente IA ➔
+              </button>
             </div>
 
             <section className="profile-section">
@@ -507,11 +618,12 @@ export default function Dashboard() {
               />
             </section>
 
+            {/* SECCIÓN DETALLES COMPLETOS: DATOS, ESTILO DE VIDA, HÁBITOS Y FÍSICO */}
             <section className="profile-section">
               <div className="section-title-row">
                 <div className="section-title">
-                  <h3>Tus Datos & Congregación</h3>
-                  <p>Información visible para los miembros de la comunidad.</p>
+                  <h3>Tus Datos, Estilo de Vida & Hábitos</h3>
+                  <p>Información visible para conectar con personas afines en la fe adventista.</p>
                 </div>
                 {!isEditingDetails ? (
                   <button
@@ -540,6 +652,10 @@ export default function Dashboard() {
 
               {isEditingDetails ? (
                 <div className="profile-edit-grid-card">
+                  {/* GRUPO 1: DATOS BÁSICOS & CONGREGACIÓN */}
+                  <div className="edit-block-header">
+                    <h4>⛪ Datos Básicos & Congregación</h4>
+                  </div>
                   <div className="form-row">
                     <div className="form-group">
                       <label>Edad</label>
@@ -572,6 +688,7 @@ export default function Dashboard() {
                       <label>Ciudad</label>
                       <input
                         type="text"
+                        placeholder="Madrid, Bogotá, CDMX..."
                         value={editDetails.city}
                         onChange={(e) =>
                           setEditDetails({ ...editDetails, city: e.target.value })
@@ -582,6 +699,7 @@ export default function Dashboard() {
                       <label>País</label>
                       <input
                         type="text"
+                        placeholder="España, Colombia, México..."
                         value={editDetails.country}
                         onChange={(e) =>
                           setEditDetails({ ...editDetails, country: e.target.value })
@@ -590,16 +708,201 @@ export default function Dashboard() {
                     </div>
                   </div>
 
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Iglesia Adventista</label>
+                      <input
+                        type="text"
+                        placeholder="Ej: IASD Alenza, IASD Central..."
+                        value={editDetails.church_name}
+                        onChange={(e) =>
+                          setEditDetails({ ...editDetails, church_name: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Bautismo Adventista</label>
+                      <select
+                        value={editDetails.baptized}
+                        onChange={(e) =>
+                          setEditDetails({ ...editDetails, baptized: e.target.value })
+                        }
+                      >
+                        <option value="Sí">Bautizado/a</option>
+                        <option value="En preparación">En preparación / Estudiando</option>
+                        <option value="Crecí en la iglesia">Crecí en la iglesia</option>
+                        <option value="Simpatizante">Simpatizante</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* GRUPO 2: CARACTERÍSTICAS FÍSICAS */}
+                  <div className="edit-block-header">
+                    <h4>📏 Características Físicas</h4>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Estatura</label>
+                      <input
+                        type="text"
+                        placeholder="Ej: 1.75 m / 175 cm"
+                        value={editDetails.height}
+                        onChange={(e) =>
+                          setEditDetails({ ...editDetails, height: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Peso / Complexión</label>
+                      <input
+                        type="text"
+                        placeholder="Ej: 70 kg, Atlética, Delgada, Media..."
+                        value={editDetails.weight}
+                        onChange={(e) =>
+                          setEditDetails({ ...editDetails, weight: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+
                   <div className="form-group">
-                    <label>Iglesia Adventista</label>
-                    <input
-                      type="text"
-                      placeholder="Ej: IASD Alenza, IASD Central..."
-                      value={editDetails.church_name}
+                    <label>Etnia / Origen</label>
+                    <select
+                      value={editDetails.ethnicity}
                       onChange={(e) =>
-                        setEditDetails({ ...editDetails, church_name: e.target.value })
+                        setEditDetails({ ...editDetails, ethnicity: e.target.value })
                       }
-                    />
+                    >
+                      <option value="Hispano / Latino">Hispano / Latino</option>
+                      <option value="Caucásico / Blanco">Caucásico / Blanco</option>
+                      <option value="Afrodescendiente">Afrodescendiente</option>
+                      <option value="Mestizo">Mestizo</option>
+                      <option value="Indígena">Indígena</option>
+                      <option value="Asiático">Asiático</option>
+                      <option value="Otro">Otro / Prefiero no decir</option>
+                    </select>
+                  </div>
+
+                  {/* GRUPO 3: ESTILO DE VIDA, HÁBITOS & VALORES */}
+                  <div className="edit-block-header">
+                    <h4>🥗 Hábitos, Estilo de Vida & Familia</h4>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>¿Fuma?</label>
+                      <select
+                        value={editDetails.smokes}
+                        onChange={(e) =>
+                          setEditDetails({ ...editDetails, smokes: e.target.value })
+                        }
+                      >
+                        <option value="No">No / Nunca (Estilo adventista)</option>
+                        <option value="Dejé de fumar">Dejé de fumar</option>
+                        <option value="Rara vez">Rara vez</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>¿Bebe alcohol?</label>
+                      <select
+                        value={editDetails.drinks}
+                        onChange={(e) =>
+                          setEditDetails({ ...editDetails, drinks: e.target.value })
+                        }
+                      >
+                        <option value="No">No / Abstemio total (Estilo adventista)</option>
+                        <option value="No consumo">No consumo alcohol</option>
+                        <option value="Ocasionalmente">Ocasionalmente</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Alimentación / Dieta</label>
+                      <select
+                        value={editDetails.diet}
+                        onChange={(e) =>
+                          setEditDetails({ ...editDetails, diet: e.target.value })
+                        }
+                      >
+                        <option value="Vegetariana">Vegetariana</option>
+                        <option value="Vegana">Vegana</option>
+                        <option value="Ovolactovegetariana">Ovolactovegetariana</option>
+                        <option value="Bíblica limpia (Levítico 11)">Bíblica limpia (Levítico 11)</option>
+                        <option value="Sin restricciones">Sin restricciones</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Estado Civil</label>
+                      <select
+                        value={editDetails.marital_status}
+                        onChange={(e) =>
+                          setEditDetails({ ...editDetails, marital_status: e.target.value })
+                        }
+                      >
+                        <option value="Soltero/a">Soltero/a (nunca casado/a)</option>
+                        <option value="Divorciado/a">Divorciado/a</option>
+                        <option value="Viudo/a">Viudo/a</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Hijos</label>
+                      <select
+                        value={editDetails.has_children}
+                        onChange={(e) =>
+                          setEditDetails({ ...editDetails, has_children: e.target.value })
+                        }
+                      >
+                        <option value="No">No tengo hijos</option>
+                        <option value="Sí, viven conmigo">Sí, viven conmigo</option>
+                        <option value="Sí, independientes">Sí, independientes</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Deseo de tener hijos</label>
+                      <select
+                        value={editDetails.wants_children}
+                        onChange={(e) =>
+                          setEditDetails({ ...editDetails, wants_children: e.target.value })
+                        }
+                      >
+                        <option value="Sí">Sí, deseo formar familia</option>
+                        <option value="No">No deseo tener hijos</option>
+                        <option value="Abierto/a">Abierto/a a la idea</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Profesión / Ocupación</label>
+                      <input
+                        type="text"
+                        placeholder="Ej: Docente, Ingeniero/a, Enfermero/a..."
+                        value={editDetails.occupation}
+                        onChange={(e) =>
+                          setEditDetails({ ...editDetails, occupation: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Nivel de Educación</label>
+                      <select
+                        value={editDetails.education}
+                        onChange={(e) =>
+                          setEditDetails({ ...editDetails, education: e.target.value })
+                        }
+                      >
+                        <option value="Universitario">Grado Universitario</option>
+                        <option value="Postgrado / Máster">Postgrado / Máster</option>
+                        <option value="Técnico / Superior">Formación Técnica</option>
+                        <option value="Bachillerato">Bachillerato / Secundaria</option>
+                        <option value="Estudiante">Estudiante</option>
+                      </select>
+                    </div>
                   </div>
 
                   <div className="details-save-actions">
@@ -609,7 +912,7 @@ export default function Dashboard() {
                       disabled={isSavingDetails}
                       onClick={handleSaveDetails}
                     >
-                      {isSavingDetails ? 'Guardando...' : '💾 Guardar Datos'}
+                      {isSavingDetails ? 'Guardando...' : '💾 Guardar Todos los Datos'}
                     </button>
                   </div>
                 </div>
@@ -630,6 +933,46 @@ export default function Dashboard() {
                   <div className="info-box">
                     <span className="box-label">Iglesia Adventista</span>
                     <strong>{user?.profile?.church_name || 'No indicada'}</strong>
+                  </div>
+                  <div className="info-box">
+                    <span className="box-label">📏 Estatura</span>
+                    <strong>{user?.profile?.height || editDetails.height || 'No indicada'}</strong>
+                  </div>
+                  <div className="info-box">
+                    <span className="box-label">⚖️ Peso / Complexión</span>
+                    <strong>{user?.profile?.weight || editDetails.weight || 'No indicado'}</strong>
+                  </div>
+                  <div className="info-box">
+                    <span className="box-label">🧬 Etnia</span>
+                    <strong>{user?.profile?.ethnicity || editDetails.ethnicity || 'No indicada'}</strong>
+                  </div>
+                  <div className="info-box">
+                    <span className="box-label">🥗 Alimentación</span>
+                    <strong>{user?.profile?.diet || editDetails.diet || 'Vegetariana'}</strong>
+                  </div>
+                  <div className="info-box">
+                    <span className="box-label">🚭 ¿Fuma?</span>
+                    <strong>{user?.profile?.smokes || editDetails.smokes || 'No'}</strong>
+                  </div>
+                  <div className="info-box">
+                    <span className="box-label">🍷 ¿Bebe alcohol?</span>
+                    <strong>{user?.profile?.drinks || editDetails.drinks || 'No'}</strong>
+                  </div>
+                  <div className="info-box">
+                    <span className="box-label">💍 Estado civil</span>
+                    <strong>{user?.profile?.marital_status || editDetails.marital_status || 'Soltero/a'}</strong>
+                  </div>
+                  <div className="info-box">
+                    <span className="box-label">👶 Hijos</span>
+                    <strong>{user?.profile?.has_children || editDetails.has_children || 'No'}</strong>
+                  </div>
+                  <div className="info-box">
+                    <span className="box-label">💼 Ocupación</span>
+                    <strong>{user?.profile?.occupation || editDetails.occupation || 'No indicada'}</strong>
+                  </div>
+                  <div className="info-box">
+                    <span className="box-label">💧 Bautismo</span>
+                    <strong>{user?.profile?.baptized || editDetails.baptized || 'Sí'}</strong>
                   </div>
                 </div>
               )}
@@ -754,6 +1097,28 @@ export default function Dashboard() {
                   </div>
                 </div>
               )}
+            </section>
+
+            {/* SECCIÓN DESTACADA CERRAR SESIÓN */}
+            <section className="profile-section profile-logout-card">
+              <div className="logout-card-content">
+                <div className="logout-card-user-info">
+                  <span className="logout-status-dot"></span>
+                  <div>
+                    <h4>Sesión Iniciada</h4>
+                    <span className="logout-user-email">Conectado como <strong>{user?.email}</strong></span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="profile-large-logout-btn"
+                  title="Cerrar sesión en este dispositivo"
+                >
+                  <span className="btn-icon">🚪</span>
+                  <span>Cerrar Sesión</span>
+                </button>
+              </div>
             </section>
           </div>
         </main>
