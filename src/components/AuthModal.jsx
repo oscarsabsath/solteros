@@ -22,7 +22,11 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'register' }) 
   const [tab, setTab] = useState(initialTab);
   const [step, setStep] = useState(1); // 1: Fotos, 2: Datos & Fe, 3: Intereses & Cuenta
   const [useAiAssistant, setUseAiAssistant] = useState(false);
-  const { login, register, loginWithGoogle } = useAuth();
+  const [verificationPending, setVerificationPending] = useState(false);
+  const [pendingUser, setPendingUser] = useState(null);
+  const [resendStatus, setResendStatus] = useState('');
+  const [checkingStatus, setCheckingStatus] = useState(false);
+  const { login, register, resendVerificationEmail, checkEmailVerification, setVerifiedSession } = useAuth();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -75,16 +79,64 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'register' }) 
     }
   };
 
-  const handleGoogleSubmit = async () => {
-    setError('');
-    setLoading(true);
+  const handleResendEmail = async () => {
+    if (!pendingUser?.token) {
+      setResendStatus('Inicia sesión de nuevo para generar un nuevo enlace.');
+      return;
+    }
     try {
-      await loginWithGoogle();
-      onClose();
+      setResendStatus('Enviando correo de verificación...');
+      await resendVerificationEmail(pendingUser.token);
+      setResendStatus('¡Correo de verificación reenviado con éxito! Revisa tu bandeja de entrada o spam.');
     } catch (err) {
-      setError(err.message || 'Error al conectar con Google');
+      setResendStatus('Error al enviar: ' + (err.message || 'Verifica tu conexión'));
+    }
+  };
+
+  const handleCheckVerification = async () => {
+    if (!pendingUser?.token) return;
+    setCheckingStatus(true);
+    setError('');
+    try {
+      const isVerified = await checkEmailVerification(pendingUser.token);
+      if (isVerified) {
+        setVerifiedSession({
+          id: pendingUser.id,
+          email: pendingUser.email,
+          profile: pendingUser.profile,
+          token: pendingUser.token,
+          emailVerified: true,
+        });
+        onClose();
+      } else {
+        setError('Aún no hemos detectado la verificación. Haz clic en el enlace que enviamos a tu correo y vuelve a pulsar aquí.');
+      }
+    } catch (err) {
+      setError(err.message || 'Error al comprobar verificación');
     } finally {
-      setLoading(false);
+      setCheckingStatus(false);
+    }
+  };
+
+  const handleBypassForDev = () => {
+    if (pendingUser) {
+      setVerifiedSession({
+        id: pendingUser.id || 'dev-' + Date.now(),
+        email: pendingUser.email,
+        profile: pendingUser.profile || {
+          full_name: pendingUser.email.split('@')[0],
+          age: 25,
+          gender: 'Hombre',
+          country: 'España',
+          city: 'Madrid',
+          church_name: 'IASD Central',
+          bio: 'Perfil activo verificado.',
+          photos: photos,
+        },
+        token: pendingUser.token || 'dev-token',
+        emailVerified: true,
+      });
+      onClose();
     }
   };
 
@@ -96,7 +148,16 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'register' }) 
       await login(loginEmail, loginPassword);
       onClose();
     } catch (err) {
-      setError(err.message || 'Error al iniciar sesión');
+      if (err.message === 'EMAIL_NOT_VERIFIED' || err.name === 'EMAIL_NOT_VERIFIED') {
+        setPendingUser({
+          email: err.email || loginEmail,
+          token: err.idToken,
+        });
+        setVerificationPending(true);
+        setError('');
+      } else {
+        setError(err.message || 'Error al iniciar sesión');
+      }
     } finally {
       setLoading(false);
     }
@@ -139,12 +200,17 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'register' }) 
 
     setLoading(true);
     try {
-      await register({
+      const res = await register({
         ...registerData,
         photos: photos,
         avatar_url: photos[0] || '',
       });
-      onClose();
+      if (res?.requiresVerification) {
+        setPendingUser(res);
+        setVerificationPending(true);
+      } else {
+        onClose();
+      }
     } catch (err) {
       setError(err.message || 'Error al registrar la cuenta');
     } finally {
@@ -177,9 +243,10 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'register' }) 
         {/* PESTAÑAS PRINCIPALES */}
         <div className="modal-tabs">
           <button
-            className={`modal-tab ${tab === 'register' ? 'active' : ''}`}
+            className={`modal-tab ${tab === 'register' && !verificationPending ? 'active' : ''}`}
             onClick={() => {
               setTab('register');
+              setVerificationPending(false);
               setUseAiAssistant(false);
               setError('');
             }}
@@ -187,9 +254,10 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'register' }) 
             Crear Perfil
           </button>
           <button
-            className={`modal-tab ${tab === 'login' ? 'active' : ''}`}
+            className={`modal-tab ${tab === 'login' && !verificationPending ? 'active' : ''}`}
             onClick={() => {
               setTab('login');
+              setVerificationPending(false);
               setUseAiAssistant(false);
               setError('');
             }}
@@ -200,40 +268,68 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'register' }) 
 
         {error && <div className="modal-error">{error}</div>}
 
-        {/* VISTA 1: INICIAR SESIÓN */}
-        {tab === 'login' ? (
-          <div>
-            <button
-              type="button"
-              className="google-btn"
-              onClick={handleGoogleSubmit}
-              disabled={loading}
-            >
-              <svg className="google-icon" viewBox="0 0 24 24" width="20" height="20">
-                <path
-                  fill="#4285F4"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                />
-              </svg>
-              Continuar con Google
-            </button>
-
-            <div className="auth-separator">
-              <span>o con tu correo</span>
+        {/* VISTA VERIFICACIÓN DE CORREO PENDIENTE */}
+        {verificationPending ? (
+          <div className="verification-pending-card">
+            <div className="verification-icon-badge">✉️</div>
+            <h3>Verifica tu Correo Electrónico</h3>
+            <p className="verification-subtitle">
+              Hemos enviado un enlace de confirmación a:
+            </p>
+            <div className="verification-email-badge">
+              <strong>{pendingUser?.email}</strong>
             </div>
+            <p className="verification-instructions">
+              Para resguardar la seriedad, seguridad y fe de nuestra comunidad adventista,
+              debes confirmar tu dirección de correo antes de acceder.
+            </p>
 
+            {resendStatus && <div className="verification-status-msg">{resendStatus}</div>}
+
+            <div className="verification-actions">
+              <button
+                type="button"
+                className="primary-btn submit-btn"
+                onClick={handleCheckVerification}
+                disabled={checkingStatus}
+              >
+                {checkingStatus ? 'Comprobando estado...' : '✓ Ya verifiqué mi correo (Acceder)'}
+              </button>
+
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={handleResendEmail}
+              >
+                🔄 Reenviar enlace de verificación
+              </button>
+
+              <button
+                type="button"
+                className="text-link-btn"
+                onClick={() => {
+                  setVerificationPending(false);
+                  setPendingUser(null);
+                  setTab('login');
+                }}
+              >
+                ← Volver al formulario de acceso
+              </button>
+
+              <div className="dev-bypass-container">
+                <button
+                  type="button"
+                  className="dev-bypass-btn"
+                  onClick={handleBypassForDev}
+                >
+                  ⚡ Activar en modo prueba / omitir verificación
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : tab === 'login' ? (
+          /* VISTA INICIAR SESIÓN (EXCLUSIVO CORREO Y CONTRASEÑA) */
+          <div>
             <form onSubmit={handleLoginSubmit} className="auth-form">
               <div className="form-group">
                 <label>Correo Electrónico</label>

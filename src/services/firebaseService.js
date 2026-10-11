@@ -161,34 +161,56 @@ export const firebaseService = {
   },
 
   /**
-   * 4. INICIAR SESIÓN CON GOOGLE
+   * 4. ENVIAR CORREO DE VERIFICACIÓN (OOB CODE)
    */
-  async loginWithGoogle() {
-    const googleUser = {
-      id: 'google-' + Date.now(),
-      email: 'oscar.adventista@gmail.com',
-      provider: 'google',
-      profile: {
-        id: 'google-' + Date.now(),
-        full_name: 'Oscar (Google)',
-        age: 28,
-        gender: 'Hombre',
-        country: 'España',
-        city: 'Madrid',
-        church_name: 'IASD Central',
-        bio: 'Autenticado con cuenta de Google en la comunidad de Solteros Adventistas.',
-        photos: [],
-      },
-    };
-
-    localStorage.setItem(MOCK_STORAGE_KEY_USER, JSON.stringify(googleUser));
-    // Guardar en Firestore
-    await this.saveProfileToFirestore(googleUser.id, googleUser.profile);
-    return googleUser;
+  async sendEmailVerification(idToken) {
+    if (!isFirebaseConfigured || !idToken) return;
+    try {
+      const url = `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${FIREBASE_API_KEY}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requestType: 'VERIFY_EMAIL',
+          idToken,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.warn('Nota sobre sendOobCode:', data.error);
+        throw new Error(data.error?.message || 'Error al enviar correo de verificación');
+      }
+      return data;
+    } catch (err) {
+      console.warn('Error al solicitar envío de correo de verificación:', err);
+      throw err;
+    }
   },
 
   /**
-   * 5. REGISTRO CON CORREO (CREAR CUENTA + GUARDAR EN FIRESTORE)
+   * 5. COMPROBAR SI EL CORREO ESTÁ VERIFICADO EN FIREBASE
+   */
+  async checkEmailVerified(idToken) {
+    if (!isFirebaseConfigured || !idToken) return true;
+    try {
+      const url = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${FIREBASE_API_KEY}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken }),
+      });
+      const data = await res.json();
+      if (res.ok && data.users && data.users.length > 0) {
+        return Boolean(data.users[0].emailVerified);
+      }
+    } catch (err) {
+      console.warn('Error al consultar lookup de Firebase:', err);
+    }
+    return false;
+  },
+
+  /**
+   * 6. REGISTRO CON CORREO (CREA CUENTA, GUARDA PERFIL Y ENVÍA VERIFICACIÓN)
    */
   async register(formData) {
     if (isFirebaseConfigured) {
@@ -226,25 +248,37 @@ export const firebaseService = {
         photos: formData.photos || [],
         avatar_url: formData.avatar_url || (formData.photos && formData.photos[0]) || '',
         interests: formData.interests || [],
+        height: formData.height || '',
+        weight: formData.weight || '',
+        ethnicity: formData.ethnicity || '',
+        smokes: formData.smokes || 'No',
+        drinks: formData.drinks || 'No',
+        diet: formData.diet || 'Vegetariana',
+        marital_status: formData.marital_status || 'Soltero/a',
       };
 
-      const userSession = {
+      // 1. Guardar en la nube (Cloud Firestore)
+      await this.saveProfileToFirestore(data.localId, userProfile, data.idToken);
+
+      // 2. Enviar automáticamente el correo de verificación oficial
+      try {
+        await this.sendEmailVerification(data.idToken);
+      } catch (e) {
+        console.warn('No se pudo enviar el correo de verificación automático:', e);
+      }
+
+      // Retornar resultado con bandera de verificación requerida
+      return {
         id: data.localId,
         email: data.email,
         profile: userProfile,
         token: data.idToken,
+        emailVerified: false,
+        requiresVerification: true,
       };
-
-      // 1. Guardar en caché local
-      localStorage.setItem(MOCK_STORAGE_KEY_USER, JSON.stringify(userSession));
-
-      // 2. Guardar en la nube (Cloud Firestore)
-      await this.saveProfileToFirestore(data.localId, userProfile, data.idToken);
-
-      return userSession;
     }
 
-    // Modo interactivo de respaldo
+    // Modo interactivo de respaldo (simulación local)
     const localUser = {
       id: 'local-' + Date.now(),
       email: formData.email,
@@ -262,14 +296,15 @@ export const firebaseService = {
         avatar_url: formData.avatar_url || (formData.photos && formData.photos[0]) || '',
         interests: formData.interests || [],
       },
+      emailVerified: false,
+      requiresVerification: true,
     };
 
-    localStorage.setItem(MOCK_STORAGE_KEY_USER, JSON.stringify(localUser));
     return localUser;
   },
 
   /**
-   * 6. INICIO DE SESIÓN CON CORREO
+   * 7. INICIO DE SESIÓN CON CORREO Y CONTRASEÑA (VERIFICACIÓN ESTRICTA)
    */
   async login(email, password) {
     if (isFirebaseConfigured) {
@@ -293,6 +328,15 @@ export const firebaseService = {
           throw new Error('Correo o contraseña incorrectos.');
         }
         throw new Error(msg || 'Error al iniciar sesión en Google Firebase');
+      }
+
+      // Comprobar estrictamente si el correo está verificado
+      const isVerified = await this.checkEmailVerified(data.idToken);
+      if (!isVerified) {
+        const unverifiedErr = new Error('EMAIL_NOT_VERIFIED');
+        unverifiedErr.email = data.email;
+        unverifiedErr.idToken = data.idToken;
+        throw unverifiedErr;
       }
 
       // Intentar recuperar el perfil guardado en Cloud Firestore
@@ -327,12 +371,14 @@ export const firebaseService = {
         email: data.email,
         profile: userProfile,
         token: data.idToken,
+        emailVerified: true,
       };
 
       localStorage.setItem(MOCK_STORAGE_KEY_USER, JSON.stringify(userSession));
       return userSession;
     }
 
+    // Modo local / demostración
     const mockUser = {
       id: 'mock-user-1',
       email,
@@ -348,6 +394,7 @@ export const firebaseService = {
         bio: 'Miembro adventista comprometido con la fe y el servicio.',
         photos: [],
       },
+      emailVerified: true,
     };
     localStorage.setItem(MOCK_STORAGE_KEY_USER, JSON.stringify(mockUser));
     return mockUser;

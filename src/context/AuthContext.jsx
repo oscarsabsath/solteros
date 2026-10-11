@@ -26,19 +26,33 @@ export function AuthProvider({ children }) {
   };
 
   const register = async (formData) => {
-    const userSession = isFirebaseConfigured
+    const res = isFirebaseConfigured
       ? await firebaseService.register(formData)
       : await supabaseService.register(formData);
-    setUser(userSession);
-    return userSession;
+    
+    // Si requiere verificación, no activamos la sesión global todavía
+    if (!res.requiresVerification) {
+      setUser(res);
+    }
+    return res;
   };
 
-  const loginWithGoogle = async () => {
-    const userSession = await firebaseService.loginWithGoogle();
-    if (userSession) {
-      setUser(userSession);
+  const resendVerificationEmail = async (idToken) => {
+    if (isFirebaseConfigured && idToken) {
+      return await firebaseService.sendEmailVerification(idToken);
     }
-    return userSession;
+  };
+
+  const checkEmailVerification = async (idToken) => {
+    if (isFirebaseConfigured && idToken) {
+      return await firebaseService.checkEmailVerified(idToken);
+    }
+    return true;
+  };
+
+  const setVerifiedSession = (userSession) => {
+    localStorage.setItem('solteros_adv_user', JSON.stringify(userSession));
+    setUser(userSession);
   };
 
   const logout = async () => {
@@ -72,7 +86,9 @@ export function AuthProvider({ children }) {
         isFirebase: isFirebaseConfigured,
         login,
         register,
-        loginWithGoogle,
+        resendVerificationEmail,
+        checkEmailVerification,
+        setVerifiedSession,
         logout,
         updateUserProfile,
       }}
