@@ -5,9 +5,20 @@ import { firebaseService } from '../services/firebaseService';
 import PhotoUploader from './PhotoUploader';
 import Encounters from './Encounters';
 import MatchModal from './MatchModal';
+import AiProfileAssistant from './AiProfileAssistant';
+
+const BIO_INSPIRATION_IDEAS = [
+  'Música sacra & alabanza 🎵',
+  'Club de Conquistadores / Guía Mayor ⛺',
+  'Estudio bíblico & profecías 📖',
+  'Estilo de vida saludable 🥗',
+  'Senderismo & naturaleza 🌿',
+  'Misiones & voluntariado 🌍',
+  'Hogar con propósito cristiano 🏡',
+];
 
 export default function Dashboard() {
-  const { user, logout, isConfigured } = useAuth();
+  const { user, logout, isConfigured, updateUserProfile } = useAuth();
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [connections, setConnections] = useState([]);
@@ -23,10 +34,47 @@ export default function Dashboard() {
     user?.profile?.photos || (user?.profile?.avatar_url ? [user?.profile?.avatar_url] : [])
   );
 
+  // Biografía editor state
+  const [bioText, setBioText] = useState(user?.profile?.bio || '');
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [isSavingBio, setIsSavingBio] = useState(false);
+  const [bioSavedMessage, setBioSavedMessage] = useState('');
+
+  // Profile data editor states
+  const [isEditingDetails, setIsEditingDetails] = useState(false);
+  const [editDetails, setEditDetails] = useState({
+    church_name: user?.profile?.church_name || '',
+    city: user?.profile?.city || '',
+    country: user?.profile?.country || '',
+    age: user?.profile?.age || 25,
+    gender: user?.profile?.gender || 'Hombre',
+  });
+  const [isSavingDetails, setIsSavingDetails] = useState(false);
+  const [detailsSavedMessage, setDetailsSavedMessage] = useState('');
+
+  // AI Assistant modal state in Dashboard
+  const [showAiModalInDashboard, setShowAiModalInDashboard] = useState(false);
+
   // Filters
   const [genderFilter, setGenderFilter] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('encounters'); // 'encounters' | 'feed' | 'matches' | 'profile'
+
+  useEffect(() => {
+    if (user?.profile) {
+      setBioText(user.profile.bio || '');
+      setEditDetails({
+        church_name: user.profile.church_name || '',
+        city: user.profile.city || '',
+        country: user.profile.country || '',
+        age: user.profile.age || 25,
+        gender: user.profile.gender || 'Hombre',
+      });
+      if (user.profile.photos) {
+        setMyPhotos(user.profile.photos);
+      }
+    }
+  }, [user]);
 
   useEffect(() => {
     async function loadData() {
@@ -73,9 +121,14 @@ export default function Dashboard() {
     }
   };
 
-  const handleUpdateMyPhotos = (updatedPhotos) => {
+  const handleUpdateMyPhotos = async (updatedPhotos) => {
     setMyPhotos(updatedPhotos);
-    if (user && user.profile) {
+    if (updateUserProfile) {
+      await updateUserProfile({
+        photos: updatedPhotos,
+        avatar_url: updatedPhotos[0] || '',
+      });
+    } else if (user && user.profile) {
       user.profile.photos = updatedPhotos;
       user.profile.avatar_url = updatedPhotos[0] || '';
       localStorage.setItem('solteros_adv_user', JSON.stringify(user));
@@ -83,6 +136,72 @@ export default function Dashboard() {
         firebaseService.saveProfileToFirestore(user.id, user.profile);
       }
     }
+  };
+
+  const handleSaveBio = async () => {
+    setIsSavingBio(true);
+    setBioSavedMessage('');
+    try {
+      if (updateUserProfile) {
+        await updateUserProfile({ bio: bioText });
+      }
+      setBioSavedMessage('¡Biografía guardada con éxito en tu perfil y en la nube!');
+      setIsEditingBio(false);
+      setTimeout(() => setBioSavedMessage(''), 4500);
+    } catch (err) {
+      console.error(err);
+      setBioSavedMessage('Error al guardar la biografía');
+    } finally {
+      setIsSavingBio(false);
+    }
+  };
+
+  const handleSaveDetails = async () => {
+    setIsSavingDetails(true);
+    setDetailsSavedMessage('');
+    try {
+      if (updateUserProfile) {
+        await updateUserProfile({
+          church_name: editDetails.church_name,
+          city: editDetails.city,
+          country: editDetails.country,
+          age: Number(editDetails.age),
+          gender: editDetails.gender,
+        });
+      }
+      setDetailsSavedMessage('¡Datos actualizados con éxito!');
+      setIsEditingDetails(false);
+      setTimeout(() => setDetailsSavedMessage(''), 4500);
+    } catch (err) {
+      console.error(err);
+      setDetailsSavedMessage('Error al actualizar datos');
+    } finally {
+      setIsSavingDetails(false);
+    }
+  };
+
+  const handleAiProfileGeneratedInDashboard = async (generated) => {
+    setBioText(generated.bio);
+    setEditDetails((prev) => ({
+      ...prev,
+      church_name: generated.churchName || prev.church_name,
+      city: generated.city || prev.city,
+      country: generated.country || prev.country,
+      age: generated.age || prev.age,
+    }));
+    if (updateUserProfile) {
+      await updateUserProfile({
+        bio: generated.bio,
+        church_name: generated.churchName,
+        city: generated.city,
+        country: generated.country,
+        age: Number(generated.age),
+        interests: generated.interests,
+      });
+    }
+    setShowAiModalInDashboard(false);
+    setBioSavedMessage('✨ ¡Biografía redactada y guardada con el Asistente IA!');
+    setTimeout(() => setBioSavedMessage(''), 4500);
   };
 
   const filteredProfiles = profiles.filter((p) => {
@@ -389,39 +508,274 @@ export default function Dashboard() {
             </section>
 
             <section className="profile-section">
-              <div className="section-title">
-                <h3>Tus Datos & Congregación</h3>
+              <div className="section-title-row">
+                <div className="section-title">
+                  <h3>Tus Datos & Congregación</h3>
+                  <p>Información visible para los miembros de la comunidad.</p>
+                </div>
+                {!isEditingDetails ? (
+                  <button
+                    type="button"
+                    className="edit-toggle-btn"
+                    onClick={() => setIsEditingDetails(true)}
+                  >
+                    ✏️ Editar datos
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="cancel-toggle-btn"
+                    onClick={() => setIsEditingDetails(false)}
+                  >
+                    ✕ Cancelar
+                  </button>
+                )}
               </div>
-              <div className="profile-info-grid">
-                <div className="info-box">
-                  <span className="box-label">Edad</span>
-                  <strong>{user?.profile?.age || 25} años</strong>
+
+              {detailsSavedMessage && (
+                <div className="profile-toast-success">
+                  ✓ {detailsSavedMessage}
                 </div>
-                <div className="info-box">
-                  <span className="box-label">Género</span>
-                  <strong>{user?.profile?.gender || 'No especificado'}</strong>
+              )}
+
+              {isEditingDetails ? (
+                <div className="profile-edit-grid-card">
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Edad</label>
+                      <input
+                        type="number"
+                        min="18"
+                        max="99"
+                        value={editDetails.age}
+                        onChange={(e) =>
+                          setEditDetails({ ...editDetails, age: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Género</label>
+                      <select
+                        value={editDetails.gender}
+                        onChange={(e) =>
+                          setEditDetails({ ...editDetails, gender: e.target.value })
+                        }
+                      >
+                        <option value="Mujer">Mujer</option>
+                        <option value="Hombre">Hombre</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Ciudad</label>
+                      <input
+                        type="text"
+                        value={editDetails.city}
+                        onChange={(e) =>
+                          setEditDetails({ ...editDetails, city: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>País</label>
+                      <input
+                        type="text"
+                        value={editDetails.country}
+                        onChange={(e) =>
+                          setEditDetails({ ...editDetails, country: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Iglesia Adventista</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: IASD Alenza, IASD Central..."
+                      value={editDetails.church_name}
+                      onChange={(e) =>
+                        setEditDetails({ ...editDetails, church_name: e.target.value })
+                      }
+                    />
+                  </div>
+
+                  <div className="details-save-actions">
+                    <button
+                      type="button"
+                      className="primary-btn submit-btn"
+                      disabled={isSavingDetails}
+                      onClick={handleSaveDetails}
+                    >
+                      {isSavingDetails ? 'Guardando...' : '💾 Guardar Datos'}
+                    </button>
+                  </div>
                 </div>
-                <div className="info-box">
-                  <span className="box-label">Ubicación</span>
-                  <strong>{user?.profile?.city || 'Madrid'}, {user?.profile?.country || 'España'}</strong>
+              ) : (
+                <div className="profile-info-grid">
+                  <div className="info-box">
+                    <span className="box-label">Edad</span>
+                    <strong>{user?.profile?.age || 25} años</strong>
+                  </div>
+                  <div className="info-box">
+                    <span className="box-label">Género</span>
+                    <strong>{user?.profile?.gender || 'No especificado'}</strong>
+                  </div>
+                  <div className="info-box">
+                    <span className="box-label">Ubicación</span>
+                    <strong>{user?.profile?.city || 'Madrid'}, {user?.profile?.country || 'España'}</strong>
+                  </div>
+                  <div className="info-box">
+                    <span className="box-label">Iglesia Adventista</span>
+                    <strong>{user?.profile?.church_name || 'No indicada'}</strong>
+                  </div>
                 </div>
-                <div className="info-box">
-                  <span className="box-label">Iglesia Adventista</span>
-                  <strong>{user?.profile?.church_name || 'No indicada'}</strong>
-                </div>
-              </div>
+              )}
             </section>
 
             <section className="profile-section">
-              <div className="section-title">
-                <h3>Tu Biografía & Propósito</h3>
+              <div className="section-title-row">
+                <div className="section-title">
+                  <h3>Tu Biografía & Propósito</h3>
+                  <p>Cuéntale a la comunidad quién eres, tu fe y tus anhelos.</p>
+                </div>
+                <div className="section-title-actions">
+                  <button
+                    type="button"
+                    className="ai-badge-btn"
+                    onClick={() => setShowAiModalInDashboard(true)}
+                    title="Usar Asistente IA para redactar tu biografía"
+                  >
+                    ✨ Redactar con IA
+                  </button>
+                  {!isEditingBio ? (
+                    <button
+                      type="button"
+                      className="edit-toggle-btn"
+                      onClick={() => setIsEditingBio(true)}
+                    >
+                      ✏️ Editar Biografía
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="cancel-toggle-btn"
+                      onClick={() => {
+                        setBioText(user?.profile?.bio || '');
+                        setIsEditingBio(false);
+                      }}
+                    >
+                      ✕ Cancelar
+                    </button>
+                  )}
+                </div>
               </div>
-              <p className="profile-bio-text">
-                {user?.profile?.bio || 'Sin biografía añadida aún. Añade una descripción para conectar mejor.'}
-              </p>
+
+              {bioSavedMessage && (
+                <div className="profile-toast-success">
+                  {bioSavedMessage}
+                </div>
+              )}
+
+              {isEditingBio ? (
+                <div className="bio-editor-card">
+                  <div className="bio-inspiration-wrap">
+                    <span className="inspiration-label">💡 Ideas con propósito (haz clic para añadir a tu texto):</span>
+                    <div className="bio-inspiration-tags">
+                      {BIO_INSPIRATION_IDEAS.map((idea) => (
+                        <button
+                          key={idea}
+                          type="button"
+                          className="bio-tag-chip"
+                          onClick={() => {
+                            setBioText((prev) => {
+                              const clean = (prev || '').trim();
+                              if (!clean) return idea;
+                              if (clean.includes(idea)) return prev;
+                              return `${clean}. ${idea}`;
+                            });
+                          }}
+                        >
+                          + {idea}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <textarea
+                    className="bio-textarea-input"
+                    rows="5"
+                    maxLength={500}
+                    placeholder="Escribe aquí tu biografía: cómo vives tu fe adventista, tus metas espirituales y personales, tus pasatiempos y lo que esperas construir en una relación..."
+                    value={bioText}
+                    onChange={(e) => setBioText(e.target.value)}
+                    autoFocus
+                  />
+
+                  <div className="bio-editor-footer">
+                    <span className="char-count-text">
+                      {bioText.length}/500 caracteres
+                    </span>
+                    <div className="bio-footer-buttons">
+                      <button
+                        type="button"
+                        className="secondary-btn"
+                        onClick={() => {
+                          setBioText(user?.profile?.bio || '');
+                          setIsEditingBio(false);
+                        }}
+                      >
+                        Descartar
+                      </button>
+                      <button
+                        type="button"
+                        className="primary-btn bio-save-btn"
+                        disabled={isSavingBio}
+                        onClick={handleSaveBio}
+                      >
+                        {isSavingBio ? 'Guardando...' : '💾 Guardar Biografía'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="bio-display-card" onClick={() => setIsEditingBio(true)}>
+                  <p className="profile-bio-text clickable">
+                    {bioText || user?.profile?.bio || (
+                      <span className="bio-empty-placeholder">
+                        📝 Haz clic aquí para escribir y llenar tu biografía con propósito...
+                      </span>
+                    )}
+                  </p>
+                  <div className="bio-click-hint">
+                    <span>✏️ Toca aquí para editar o agregar ideas</span>
+                  </div>
+                </div>
+              )}
             </section>
           </div>
         </main>
+      )}
+
+      {/* MODAL ASISTENTE IA DENTRO DE MI PERFIL */}
+      {showAiModalInDashboard && (
+        <div className="modal-backdrop" onClick={() => setShowAiModalInDashboard(false)}>
+          <div className="modal-card modal-card-large" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="modal-close-btn"
+              onClick={() => setShowAiModalInDashboard(false)}
+              aria-label="Cerrar modal"
+            >
+              ✕
+            </button>
+            <AiProfileAssistant
+              onProfileGenerated={handleAiProfileGeneratedInDashboard}
+              onCancel={() => setShowAiModalInDashboard(false)}
+            />
+          </div>
+        </div>
       )}
 
       {/* CELEBRACIÓN DE MATCH ESTILO TINDER */}

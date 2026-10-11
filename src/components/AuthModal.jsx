@@ -98,10 +98,6 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'register' }) 
   const handleNextStep = () => {
     setError('');
     if (step === 1) {
-      if (photos.length === 0) {
-        setError('Por favor añade al menos 1 foto para tu perfil antes de continuar.');
-        return;
-      }
       setStep(2);
     } else if (step === 2) {
       if (!registerData.fullName.trim()) {
@@ -161,7 +157,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'register' }) 
       interests: generated.interests,
     }));
     setUseAiAssistant(false);
-    setStep(1); // Directo a subir fotos
+    setStep(3); // Directo al Paso 3 para revisar y editar la biografía generada
   };
 
   return (
@@ -285,14 +281,38 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'register' }) 
               </button>
             </div>
 
-            {/* BARRA DE PROGRESO */}
+            {/* BARRA DE PROGRESO Y TABS NAVEGABLES */}
+            <div className="wizard-step-tabs-bar">
+              <button
+                type="button"
+                className={`wizard-step-tab ${step === 1 ? 'active' : ''}`}
+                onClick={() => setStep(1)}
+              >
+                1. Fotos {photos.length > 0 ? `(${photos.length})` : ''}
+              </button>
+              <button
+                type="button"
+                className={`wizard-step-tab ${step === 2 ? 'active' : ''}`}
+                onClick={() => setStep(2)}
+              >
+                2. Quién eres & Fe
+              </button>
+              <button
+                type="button"
+                className={`wizard-step-tab ${step === 3 ? 'active' : ''}`}
+                onClick={() => setStep(3)}
+              >
+                3. Biografía & Cuenta {registerData.bio ? '✓' : ''}
+              </button>
+            </div>
+
             <div className="wizard-progress-header">
               <div className="wizard-step-info">
                 <span>Paso {step} de 3</span>
                 <strong>
                   {step === 1 && 'Tus Mejores Fotos'}
                   {step === 2 && 'Quién eres & Tu Fe'}
-                  {step === 3 && 'Intereses & Tu Propósito'}
+                  {step === 3 && 'Intereses, Biografía & Cuenta'}
                 </strong>
               </div>
               <div className="wizard-progress-track">
@@ -453,11 +473,48 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'register' }) 
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label>Tu Biografía o Propósito:</label>
+                <div className="form-group bio-wizard-group">
+                  <div className="bio-label-header">
+                    <label>Tu Biografía o Propósito:</label>
+                    <span className="char-count-pill">
+                      {(registerData.bio || '').length}/500 caracteres
+                    </span>
+                  </div>
+
+                  <div className="bio-ideas-row">
+                    <span className="bio-ideas-label">💡 Ideas con propósito (toca para añadir):</span>
+                    <div className="bio-ideas-tags">
+                      {[
+                        'Música sacra 🎵',
+                        'Conquistadores ⛺',
+                        'Estudio bíblico 📖',
+                        'Vida saludable 🥗',
+                        'Misiones 🌍',
+                        'Hogar cristiano 🏡',
+                      ].map((tag) => (
+                        <button
+                          key={tag}
+                          type="button"
+                          className="bio-quick-tag"
+                          onClick={() => {
+                            setRegisterData((prev) => {
+                              const curr = (prev.bio || '').trim();
+                              if (!curr) return { ...prev, bio: tag };
+                              if (curr.includes(tag)) return prev;
+                              return { ...prev, bio: `${curr}. ${tag}` };
+                            });
+                          }}
+                        >
+                          + {tag}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   <textarea
-                    rows="3"
-                    placeholder="Cuéntanos cómo vives tu fe, tus metas de vida o lo que esperas construir en una relación..."
+                    rows="4"
+                    maxLength={500}
+                    placeholder="Cuéntanos cómo vives tu fe adventista, tus metas de vida o lo que esperas construir en una relación con propósito..."
                     value={registerData.bio}
                     onChange={(e) =>
                       setRegisterData({ ...registerData, bio: e.target.value })

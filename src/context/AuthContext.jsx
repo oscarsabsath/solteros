@@ -46,6 +46,23 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const updateUserProfile = async (partialProfile) => {
+    if (!user) return null;
+    const updatedUser = {
+      ...user,
+      profile: {
+        ...(user.profile || {}),
+        ...partialProfile,
+      },
+    };
+    setUser(updatedUser);
+    localStorage.setItem('solteros_adv_user', JSON.stringify(updatedUser));
+    if (updatedUser.id) {
+      await firebaseService.saveProfileToFirestore(updatedUser.id, updatedUser.profile);
+    }
+    return updatedUser;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -57,6 +74,7 @@ export function AuthProvider({ children }) {
         register,
         loginWithGoogle,
         logout,
+        updateUserProfile,
       }}
     >
       {children}
