@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabaseService } from '../services/supabaseService';
+import { firebaseService } from '../services/firebaseService';
 import PhotoUploader from './PhotoUploader';
 import Encounters from './Encounters';
 import MatchModal from './MatchModal';
@@ -78,6 +79,9 @@ export default function Dashboard() {
       user.profile.photos = updatedPhotos;
       user.profile.avatar_url = updatedPhotos[0] || '';
       localStorage.setItem('solteros_adv_user', JSON.stringify(user));
+      if (user.id) {
+        firebaseService.saveProfileToFirestore(user.id, user.profile);
+      }
     }
   };
 

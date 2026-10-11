@@ -1,7 +1,4 @@
-/**
- * Servicio de conexión con Supabase (Autenticación y Datos)
- * Utiliza fetch nativo para máxima compatibilidad sin dependencias adicionales.
- */
+import { firebaseService } from './firebaseService';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -281,10 +278,13 @@ export const supabaseService = {
   },
 
   /**
-   * Obtener perfiles de la comunidad
+   * Obtener perfiles de la comunidad (Cloud Firestore / Supabase / Demo)
    */
   async getProfiles() {
-    if (isSupabaseConfigured) {
+    let cloudProfiles = [];
+    if (firebaseService.isConfigured) {
+      cloudProfiles = await firebaseService.getProfilesFromFirestore();
+    } else if (isSupabaseConfigured) {
       const session = this.getCurrentUser();
       const token = session?.token || SUPABASE_ANON_KEY;
       try {
@@ -296,18 +296,27 @@ export const supabaseService = {
         });
         if (res.ok) {
           const list = await res.json();
-          if (list && list.length > 0) return list;
+          if (list && list.length > 0) cloudProfiles = list;
         }
       } catch (e) {
-        console.warn('Fallo al consultar perfiles en Supabase, usando respaldo local:', e);
+        console.warn('Fallo al consultar perfiles en Supabase:', e);
       }
     }
 
-    return getLocalDemoProfiles();
+    const demoProfiles = getLocalDemoProfiles();
+
+    // Si hay perfiles en Cloud Firestore, unirlos a los perfiles de muestra
+    if (cloudProfiles && cloudProfiles.length > 0) {
+      const cloudIds = new Set(cloudProfiles.map((p) => p.id));
+      const remainingDemo = demoProfiles.filter((p) => !cloudIds.has(p.id));
+      return [...cloudProfiles, ...remainingDemo];
+    }
+
+    return demoProfiles;
   },
 
   /**
-   * Conectar / Enviar like con propósito (Estilo Badoo)
+   * Conectar / Enviar like con propósito (Estilo Badoo / Tinder)
    */
   async likeProfile(targetProfileId) {
     const savedLikes = JSON.parse(localStorage.getItem('solteros_adv_likes') || '[]');
@@ -316,10 +325,16 @@ export const supabaseService = {
       localStorage.setItem('solteros_adv_likes', JSON.stringify(savedLikes));
     }
 
+    // Guardar en Cloud Firestore si está conectado
+    const session = this.getCurrentUser();
+    if (session && session.id) {
+      await firebaseService.sendLikeToFirestore(session.id, targetProfileId);
+    }
+
     // Actualizar conexiones
     await this.connectWith(targetProfileId);
 
-    // Simular coincidencia mutua (Match) para una experiencia Badoo real
+    // Simular coincidencia mutua (Match) para una experiencia fluida
     const savedMatches = JSON.parse(localStorage.getItem('solteros_adv_matches') || '[]');
     const isMatch = !savedMatches.includes(targetProfileId);
     if (isMatch) {
